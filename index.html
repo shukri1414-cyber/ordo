@@ -595,13 +595,14 @@ function aiCopy(blob){return new Promise(ok=>{const u=URL.createObjectURL(blob),
 async function analyzeAndFile(imgs){
   openSheet(`<div class="spin"></div><p style="text-align:center;font-weight:600;font-size:17px" id="stage">${t("reading")}</p><p class="sub" style="text-align:center;margin-top:6px">${t("readingSub")}</p>`);
   const {data:{session}}=await sb.auth.getSession();
+  const up=startUploads(imgs);
   const small=await Promise.all(imgs.slice(0,4).map(x=>aiCopy(x.blob)));
   let res;try{
     const call=async()=>{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),90000);try{const r=await fetch(SUPABASE_URL+"/functions/v1/analyze",{signal:ctl.signal,method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY},body:JSON.stringify({images:small,lang:LANG})});let j;try{j=await r.json()}catch(e){j={error:"HTTP "+r.status}}if(!r.ok||j.error){const e=new Error(j.error||r.status);e.retry=r.status>=500;throw e}return j}finally{clearTimeout(tm)}};
     try{res=await call()}catch(e){if(!e.retry)throw e;await new Promise(r=>setTimeout(r,1500));res=await call()}
-  }catch(err){return failSheet(t("readFail"),String(err.message||err))}
+  }catch(err){up.p.then(ps=>sb.storage.from("scans").remove(ps)).catch(()=>{});return failSheet(t("readFail"),String(err.message||err))}
   $("#stage").textContent=t("saving");
-  try{const d=await fileDoc(res,imgs);showFiled(d,true)}catch(err){failSheet(t("saveFail"),String(err.message||err))}
+  try{const d=await fileDoc(res,imgs,up);showFiled(d,true)}catch(err){failSheet(t("saveFail"),String(err.message||err))}
 }
 // ===== Scanner: edge detection, perspective flattening, scanner look =====
 const SC={pages:[],src:null,q:null,mode:"color",out:null,step:"edit"};
@@ -729,6 +730,13 @@ function enhance(cv,mode){
     if(mode==="scan"){const L=(dd[i]*.3+dd[i+1]*.59+dd[i+2]*.11)/Math.max(24,bd[i]*.3+bd[i+1]*.59+bd[i+2]*.11);let t=(L-.3)/.6;t=t<0?0:t>1?1:t;const y=255*Math.pow(t,1.6);dd[i]=dd[i+1]=dd[i+2]=y}
     else{let r=dd[i]/Math.max(30,bd[i]),g=dd[i+1]/Math.max(30,bd[i+1]),bb=dd[i+2]/Math.max(30,bd[i+2]);const m=(r+g+bb)/3;r=m+(r-m)*1.18;g=m+(g-m)*1.18;bb=m+(bb-m)*1.18;
       const f=x=>{let t=(x-.06)/.86;t=t<0?0:t>1?1:t;return 255*Math.pow(t,1.3)};dd[i]=f(r);dd[i+1]=f(g);dd[i+2]=f(bb)}}
+  // finer local white balance: flattens fold shadows and removes colour cast on paper/text
+  {const t2=document.createElement("canvas");t2.width=w;t2.height=h;const tx=t2.getContext("2d",{willReadFrequently:true});tx.putImageData(id,0,0);
+   const s2w=Math.max(4,Math.round(w/90)),s2h=Math.max(4,Math.round(h/90)),s2=document.createElement("canvas");s2.width=s2w;s2.height=s2h;const s2x=s2.getContext("2d",{willReadFrequently:true});s2x.imageSmoothingQuality="high";s2x.drawImage(t2,0,0,s2w,s2h);
+   const S2=s2x.getImageData(0,0,s2w,s2h);for(let pass=0;pass<2;pass++){const A=new Uint8ClampedArray(S2.data),D=S2.data;for(let y=0;y<s2h;y++)for(let x=0;x<s2w;x++){let bl=-1,bi=0;for(let yy=Math.max(0,y-1);yy<=Math.min(s2h-1,y+1);yy++)for(let xx=Math.max(0,x-1);xx<=Math.min(s2w-1,x+1);xx++){const p=(yy*s2w+xx)*4,l=A[p]+A[p+1]+A[p+2];if(l>bl){bl=l;bi=p}}const q=(y*s2w+x)*4;D[q]=A[bi];D[q+1]=A[bi+1];D[q+2]=A[bi+2]}}
+   s2x.putImageData(S2,0,0);const u2=document.createElement("canvas");u2.width=w;u2.height=h;const ux=u2.getContext("2d",{willReadFrequently:true});ux.imageSmoothingQuality="high";ux.drawImage(s2,0,0,w,h);const B2=ux.getImageData(0,0,w,h).data;
+   for(let i=0;i<dd.length;i+=4){const r=dd[i],g=dd[i+1],bb=dd[i+2],mx=Math.max(r,g,bb),mn=Math.min(r,g,bb);if(mx-mn>34)continue;
+     const L=r*.3+g*.59+bb*.11,BL=Math.max(60,B2[i]*.3+B2[i+1]*.59+B2[i+2]*.11);let v=L/BL;v=v>1?1:v;let o=(v-.08)/.84;o=o<0?0:o>1?1:o;const y=255*Math.pow(o,1.25);dd[i]=dd[i+1]=dd[i+2]=y}}
   // gentle sharpening (unsharp mask)
   const src2=new Uint8ClampedArray(dd),W4=w*4;
   for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){const i=(y*w+x)*4;for(let c=0;c<3;c++){const j=i+c,bl=(src2[j-4]+src2[j+4]+src2[j-W4]+src2[j+W4]+src2[j])/5;dd[j]=src2[j]+(src2[j]-bl)*.7}}
@@ -782,11 +790,11 @@ function scnFinish(){const imgs=SC.pages.slice(0,20);scnClose();analyzeAndFile(i
 
 function failSheet(msg,detail){openSheet(`<h2 style="color:var(--ink);font-size:20px;margin:6px 0 10px">${esc(msg)}</h2>${detail?`<p class="sub" style="direction:ltr;text-align:left">${esc(detail)}</p>`:""}<div class="btns"><button class="btn b-ink" onclick="closeSheet()">${t("ok")}</button></div>`)}
 function shrink(file,max,q){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);c.toBlob(bl=>{const fr=new FileReader();fr.onload=()=>ok({blob:bl,b64:fr.result.split(",")[1]});fr.readAsDataURL(bl)},"image/jpeg",q);URL.revokeObjectURL(u)};i.onerror=bad;i.src=u})}
-async function fileDoc(res,imgs){
+function startUploads(imgs){const id=crypto.randomUUID();const p=Promise.resolve().then(()=>Promise.all(imgs.map((x,k)=>{const path=`${household.id}/${id}/${k+1}.jpg`;return sb.storage.from("scans").upload(path,x.blob,{contentType:"image/jpeg"}).then(r=>{if(r.error)throw r.error;return path})})));p.catch(()=>{});return{id,p}}
+async function fileDoc(res,imgs,up){
   let sec=sectionOf(res.section_id)||sections.find(s=>s.name==="متفرقات")||sections[0];
-  const no=(await sb.rpc("next_doc_no",{p_section:sec.id})).data;
-  const id=crypto.randomUUID();const paths=[];
-  for(let k=0;k<imgs.length;k++){const p=`${household.id}/${id}/${k+1}.jpg`;const up=await sb.storage.from("scans").upload(p,imgs[k].blob,{contentType:"image/jpeg"});if(up.error)throw up.error;paths.push(p)}
+  up=up||startUploads(imgs);const id=up.id;
+  const [noR,paths]=await Promise.all([sb.rpc("next_doc_no",{p_section:sec.id}),up.p]);const no=noR.data;
   const row={id,household_id:household.id,binder_id:sec.binder_id,section_id:sec.id,doc_no:no,title:res.title||null,sender:res.sender||null,summary:res.summary||null,action:res.action||null,deadline:res.deadline||null,doc_date:res.doc_date||null,full_text:res.important_text||null,image_paths:paths,created_by:me.id};
   const ins=await sb.from("documents").insert(row).select().single();if(ins.error)throw ins.error;
   docs.unshift(ins.data);render();return ins.data}
