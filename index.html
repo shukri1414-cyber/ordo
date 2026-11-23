@@ -327,6 +327,18 @@ nav button.on{position:relative}nav button.on::after{content:"";position:absolut
 .lv-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:2}
 .lv-flash.on{animation:fl .4s ease-out}
 @keyframes fl{0%{opacity:.85}100%{opacity:0}}
+
+/* background reading */
+.pend{display:flex;align-items:center;gap:14px;padding:12px 14px;margin-top:20px}
+.pthumb{position:relative;width:46px;height:60px;flex:none;border-radius:8px;overflow:visible}
+.pthumb img{width:100%;height:100%;object-fit:cover;border-radius:8px;box-shadow:0 0 0 1px var(--line),0 6px 12px -6px rgba(0,0,0,.4)}
+.pthumb b{position:absolute;top:-6px;inset-inline-end:-6px;min-width:20px;height:20px;border-radius:10px;background:#F2A44B;color:#121418;font-size:11px;display:grid;place-items:center;padding:0 5px}
+.pend > span > b{font-size:15px;font-weight:600}
+.shim{display:block;height:8px;border-radius:4px;margin-top:9px;width:80%;background:linear-gradient(90deg,var(--soft) 0%,#e8e9ec 40%,#F2A44B55 50%,#e8e9ec 60%,var(--soft) 100%);background-size:300% 100%;animation:shim 1.4s linear infinite}
+@keyframes shim{from{background-position:100% 0}to{background-position:-200% 0}}
+.spin.sm{width:22px;height:22px;border-width:3px;margin:0;flex:none}
+.pend.err{box-shadow:inset 0 0 0 1.5px var(--red),var(--sh)}
+@media (prefers-reduced-motion:reduce){.shim{animation:none}}
 .scn{position:fixed;inset:0;z-index:60;background:#0F1218;color:#fff;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 .scn[hidden]{display:none}
 .scn-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px 6px}
@@ -395,7 +407,7 @@ const LANGS=[["ar","العربية"],["en","English"],["de","Deutsch"],["nl","Ne
 let LANG=(()=>{try{const s=localStorage.getItem("ordo_lang");if(s)return s}catch(e){}const n=(navigator.language||"ar").slice(0,2);return["ar","en","de","nl"].includes(n)?n:"ar"})();
 const LOC={ar:"ar-u-nu-latn",en:"en-GB",de:"de-DE",nl:"nl-NL"};
 const I={
-ar:{lvFind:"وجّه الكاميرا على الورقة",lvHold:"ثبّت الهاتف…",lvFound:"اضغط زر التصوير",lvGot:"تم ✓ ضع الصفحة التالية",lvAuto:"تلقائي",lvManual:"يدوي",lvPhotos:"الصور",lvBW:"أبيض وأسود",lvColor:"ملوّن",smartNone:"لا مواعيد قريبة · كل شيء مرتّب",smartSome:(n,d)=>`${n} ${n===1?"موعد":n<=10?"مواعيد":"موعداً"} — أقربها ${d<=0?"اليوم":`بعد ${d} ${d===1?"يوم":d<=10?"أيام":"يوماً"}`}`,s1s:"الماسح يقصّ الورقة ويوضّحها",s2s:"Claude يشرحها بلغتك",s3s:"رقمها وملفها جاهزان",file:"الملف",num:"رقم",unfiled:"غير مصنّف",overdue:"انتهى الموعد",todayEx:"اليوم!",left:n=>`باقي ${n} ${n===1?"يوم":n<=10?"أيام":"يوماً"}`,dayw:n=>n===1?"يوم":n<=10?"أيام":"يوماً",
+ar:{pendReading:"Claude يقرأ الرسالة…",retry:"أعد المحاولة",filedTo:"حُفظت:",lvFind:"وجّه الكاميرا على الورقة",lvHold:"ثبّت الهاتف…",lvFound:"اضغط زر التصوير",lvGot:"تم ✓ ضع الصفحة التالية",lvAuto:"تلقائي",lvManual:"يدوي",lvPhotos:"الصور",lvBW:"أبيض وأسود",lvColor:"ملوّن",smartNone:"لا مواعيد قريبة · كل شيء مرتّب",smartSome:(n,d)=>`${n} ${n===1?"موعد":n<=10?"مواعيد":"موعداً"} — أقربها ${d<=0?"اليوم":`بعد ${d} ${d===1?"يوم":d<=10?"أيام":"يوماً"}`}`,s1s:"الماسح يقصّ الورقة ويوضّحها",s2s:"Claude يشرحها بلغتك",s3s:"رقمها وملفها جاهزان",file:"الملف",num:"رقم",unfiled:"غير مصنّف",overdue:"انتهى الموعد",todayEx:"اليوم!",left:n=>`باقي ${n} ${n===1?"يوم":n<=10?"أيام":"يوماً"}`,dayw:n=>n===1?"يوم":n<=10?"أيام":"يوماً",
  gm:"صباح الخير",ga:"نهارك سعيد",ge:"مساء الخير",and:" و ",papers:n=>n===1?"ورقة":n>=3&&n<=10?"أوراق":"ورقة",homeLib:"مكتبة البيت",upcoming:"مواعيد قريبة",bindersN:"ملفات",attention:"تحتاج انتباهكم",over:"انتهى",today:"اليوم",recent:"آخر الأوراق",
  startH:"ابدأ بأول رسالة",s1b:"صوّر",s1:"الرسالة بالكاميرا، والماسح يقصّها ويجعلها واضحة.",s2b:"افهم",s2:"Ordo يقرأها ويشرحها لك بالعربية مع الموعد.",s3b:"ضعها",s3:"يقول لك الملف والقسم والرقم، فتضعها هناك.",
  library:"المكتبة",inDrawer:(a,b)=>`${a} ملفات في الدرج · ${b} ${b===1?"ورقة":b>=3&&b<=10?"أوراق":"ورقة"}`,secsDocs:(a,b)=>`${a} أقسام · ${b} ورقة`,noInSec:"لا أوراق في هذا القسم بعد.",numsNote:"الأرقام هنا هي نفس الأرقام المكتوبة على الأوراق في الملف",
@@ -410,7 +422,7 @@ ar:{lvFind:"وجّه الكاميرا على الورقة",lvHold:"ثبّت ال
  writeNo:(n,s)=>`اكتب <b style="color:var(--ink)">${n}</b> في زاوية الورقة، وضعها في قسم ${s}. نسختها محفوظة في نفس المكان داخل Ordo.`,filedBtn:"وضعتها في الملف ✓",notDone:"لم تُنجز بعد",doneBtn:"تم الرد ✓",move:"غيّر المكان",del:"حذف الورقة",
  doneToast:"تم. أحسنتم 👍",reopened:"أُعيدت إلى قائمة الانتباه",pageAlt:"صفحة من الرسالة",chooseLoc:"اختر المكان الصحيح",newNo:"ستأخذ الورقة رقماً جديداً في القسم الذي تختاره.",current:"الحالي",moveFail:"لم ينجح النقل",
  delQ:"حذف هذه الورقة من Ordo؟",delInfo:"تُحذف الصور والمعلومات نهائياً. الورقة الأصلية في الملف لا تتأثر.",back:"رجوع",delYes:"حذف نهائياً",delFail:"لم ينجح الحذف",deleted:"حُذفت"},
-en:{lvFind:"Point the camera at the paper",lvHold:"Hold still…",lvFound:"Tap the shutter",lvGot:"Captured ✓ Next page?",lvAuto:"Auto",lvManual:"Manual",lvPhotos:"Photos",lvBW:"B&W",lvColor:"Colour",smartNone:"No deadlines coming up · all in order",smartSome:(n,d)=>`${n} deadline${n>1?"s":""} — next ${d<=0?"today":d===1?"tomorrow":`in ${d} days`}`,s1s:"The scanner crops and cleans it",s2s:"Claude explains it in your language",s3s:"You get its binder and number",file:"Binder",num:"No.",unfiled:"Unfiled",overdue:"Overdue",todayEx:"Today!",left:n=>n===1?"1 day left":`${n} days left`,dayw:n=>n===1?"day":"days",
+en:{pendReading:"Claude is reading the letter…",retry:"Try again",filedTo:"Filed:",lvFind:"Point the camera at the paper",lvHold:"Hold still…",lvFound:"Tap the shutter",lvGot:"Captured ✓ Next page?",lvAuto:"Auto",lvManual:"Manual",lvPhotos:"Photos",lvBW:"B&W",lvColor:"Colour",smartNone:"No deadlines coming up · all in order",smartSome:(n,d)=>`${n} deadline${n>1?"s":""} — next ${d<=0?"today":d===1?"tomorrow":`in ${d} days`}`,s1s:"The scanner crops and cleans it",s2s:"Claude explains it in your language",s3s:"You get its binder and number",file:"Binder",num:"No.",unfiled:"Unfiled",overdue:"Overdue",todayEx:"Today!",left:n=>n===1?"1 day left":`${n} days left`,dayw:n=>n===1?"day":"days",
  gm:"Good morning",ga:"Good afternoon",ge:"Good evening",and:" & ",papers:n=>n===1?"document":"documents",homeLib:"Home library",upcoming:"upcoming",bindersN:"binders",attention:"Needs your attention",over:"Overdue",today:"Today",recent:"Recent documents",
  startH:"Start with your first letter",s1b:"Scan",s1:"the letter with your camera. The scanner crops and cleans it.",s2b:"Understand",s2:"Ordo reads it and explains it in plain English, with the deadline.",s3b:"File it",s3:"Ordo tells you the binder, section and number. Put it there.",
  library:"Library",inDrawer:(a,b)=>`${a} binders · ${b} ${b===1?"document":"documents"}`,secsDocs:(a,b)=>`${a} sections · ${b} docs`,noInSec:"No documents in this section yet.",numsNote:"These numbers match the numbers written on the papers in the binder",
@@ -425,7 +437,7 @@ en:{lvFind:"Point the camera at the paper",lvHold:"Hold still…",lvFound:"Tap t
  writeNo:(n,s)=>`Write <b style="color:var(--ink)">${n}</b> in the corner of the paper and put it in ${s}. The copy is saved in the same place in Ordo.`,filedBtn:"Filed it ✓",notDone:"Not done yet",doneBtn:"Done ✓",move:"Move",del:"Delete document",
  doneToast:"Done. Well done 👍",reopened:"Back on the attention list",pageAlt:"Page of the letter",chooseLoc:"Choose the right place",newNo:"The document gets a new number in the section you choose.",current:"Current",moveFail:"Move failed",
  delQ:"Delete this document from Ordo?",delInfo:"Scans and details are deleted permanently. The paper in the binder is not affected.",back:"Back",delYes:"Delete permanently",delFail:"Delete failed",deleted:"Deleted"},
-de:{lvFind:"Kamera auf das Papier richten",lvHold:"Ruhig halten…",lvFound:"Auslöser drücken",lvGot:"Erfasst ✓ Nächste Seite?",lvAuto:"Auto",lvManual:"Manuell",lvPhotos:"Fotos",lvBW:"S/W",lvColor:"Farbe",smartNone:"Keine Fristen · alles in Ordnung",smartSome:(n,d)=>`${n} Frist${n>1?"en":""} – nächste ${d<=0?"heute":d===1?"morgen":`in ${d} Tagen`}`,s1s:"Der Scanner schneidet zu und schärft",s2s:"Claude erklärt ihn in deiner Sprache",s3s:"Du bekommst Ordner und Nummer",file:"Ordner",num:"Nr.",unfiled:"Nicht abgelegt",overdue:"Frist abgelaufen",todayEx:"Heute!",left:n=>n===1?"noch 1 Tag":`noch ${n} Tage`,dayw:n=>n===1?"Tag":"Tage",
+de:{pendReading:"Claude liest den Brief…",retry:"Erneut versuchen",filedTo:"Abgelegt:",lvFind:"Kamera auf das Papier richten",lvHold:"Ruhig halten…",lvFound:"Auslöser drücken",lvGot:"Erfasst ✓ Nächste Seite?",lvAuto:"Auto",lvManual:"Manuell",lvPhotos:"Fotos",lvBW:"S/W",lvColor:"Farbe",smartNone:"Keine Fristen · alles in Ordnung",smartSome:(n,d)=>`${n} Frist${n>1?"en":""} – nächste ${d<=0?"heute":d===1?"morgen":`in ${d} Tagen`}`,s1s:"Der Scanner schneidet zu und schärft",s2s:"Claude erklärt ihn in deiner Sprache",s3s:"Du bekommst Ordner und Nummer",file:"Ordner",num:"Nr.",unfiled:"Nicht abgelegt",overdue:"Frist abgelaufen",todayEx:"Heute!",left:n=>n===1?"noch 1 Tag":`noch ${n} Tage`,dayw:n=>n===1?"Tag":"Tage",
  gm:"Guten Morgen",ga:"Guten Tag",ge:"Guten Abend",and:" & ",papers:n=>n===1?"Dokument":"Dokumente",homeLib:"Hausarchiv",upcoming:"Fristen",bindersN:"Ordner",attention:"Braucht eure Aufmerksamkeit",over:"Vorbei",today:"Heute",recent:"Zuletzt abgelegt",
  startH:"Fang mit dem ersten Brief an",s1b:"Scannen",s1:"Brief mit der Kamera aufnehmen. Der Scanner schneidet ihn zu und macht ihn klar.",s2b:"Verstehen",s2:"Ordo liest ihn und erklärt ihn verständlich, mit Frist.",s3b:"Ablegen",s3:"Ordo nennt Ordner, Fach und Nummer. Dort legst du ihn ab.",
  library:"Archiv",inDrawer:(a,b)=>`${a} Ordner · ${b} ${b===1?"Dokument":"Dokumente"}`,secsDocs:(a,b)=>`${a} Fächer · ${b} Dok.`,noInSec:"Noch keine Dokumente in diesem Fach.",numsNote:"Diese Nummern stehen auch auf den Papieren im Ordner",
@@ -440,7 +452,7 @@ de:{lvFind:"Kamera auf das Papier richten",lvHold:"Ruhig halten…",lvFound:"Aus
  writeNo:(n,s)=>`Schreib <b style="color:var(--ink)">${n}</b> in die Ecke des Papiers und leg es ins Fach ${s}. Die Kopie liegt am selben Platz in Ordo.`,filedBtn:"Abgelegt ✓",notDone:"Noch offen",doneBtn:"Erledigt ✓",move:"Verschieben",del:"Dokument löschen",
  doneToast:"Erledigt 👍",reopened:"Wieder auf der Liste",pageAlt:"Seite des Briefs",chooseLoc:"Richtigen Platz wählen",newNo:"Das Dokument bekommt im gewählten Fach eine neue Nummer.",current:"Aktuell",moveFail:"Verschieben fehlgeschlagen",
  delQ:"Dieses Dokument aus Ordo löschen?",delInfo:"Scans und Angaben werden endgültig gelöscht. Das Papier im Ordner bleibt.",back:"Zurück",delYes:"Endgültig löschen",delFail:"Löschen fehlgeschlagen",deleted:"Gelöscht"},
-nl:{lvFind:"Richt de camera op het papier",lvHold:"Stil houden…",lvFound:"Druk op de ontspanknop",lvGot:"Vastgelegd ✓ Volgende pagina?",lvAuto:"Auto",lvManual:"Handmatig",lvPhotos:"Foto's",lvBW:"Z/W",lvColor:"Kleur",smartNone:"Geen deadlines · alles op orde",smartSome:(n,d)=>`${n} deadline${n>1?"s":""} — eerstvolgende ${d<=0?"vandaag":d===1?"morgen":`over ${d} dagen`}`,s1s:"De scanner snijdt bij en maakt scherp",s2s:"Claude legt hem uit in jouw taal",s3s:"Je krijgt de map en het nummer",file:"Map",num:"Nr.",unfiled:"Niet opgeborgen",overdue:"Verlopen",todayEx:"Vandaag!",left:n=>n===1?"nog 1 dag":`nog ${n} dagen`,dayw:n=>n===1?"dag":"dagen",
+nl:{pendReading:"Claude leest de brief…",retry:"Opnieuw proberen",filedTo:"Opgeborgen:",lvFind:"Richt de camera op het papier",lvHold:"Stil houden…",lvFound:"Druk op de ontspanknop",lvGot:"Vastgelegd ✓ Volgende pagina?",lvAuto:"Auto",lvManual:"Handmatig",lvPhotos:"Foto's",lvBW:"Z/W",lvColor:"Kleur",smartNone:"Geen deadlines · alles op orde",smartSome:(n,d)=>`${n} deadline${n>1?"s":""} — eerstvolgende ${d<=0?"vandaag":d===1?"morgen":`over ${d} dagen`}`,s1s:"De scanner snijdt bij en maakt scherp",s2s:"Claude legt hem uit in jouw taal",s3s:"Je krijgt de map en het nummer",file:"Map",num:"Nr.",unfiled:"Niet opgeborgen",overdue:"Verlopen",todayEx:"Vandaag!",left:n=>n===1?"nog 1 dag":`nog ${n} dagen`,dayw:n=>n===1?"dag":"dagen",
  gm:"Goedemorgen",ga:"Goedemiddag",ge:"Goedenavond",and:" & ",papers:n=>n===1?"document":"documenten",homeLib:"Thuisarchief",upcoming:"deadlines",bindersN:"mappen",attention:"Vraagt jullie aandacht",over:"Verlopen",today:"Vandaag",recent:"Recent opgeborgen",
  startH:"Begin met je eerste brief",s1b:"Scan",s1:"de brief met je camera. De scanner snijdt hem bij en maakt hem scherp.",s2b:"Begrijp",s2:"Ordo leest hem en legt hem helder uit, met de deadline.",s3b:"Berg op",s3:"Ordo zegt je de map, het tabblad en het nummer. Daar berg je hem op.",
  library:"Archief",inDrawer:(a,b)=>`${a} mappen · ${b} ${b===1?"document":"documenten"}`,secsDocs:(a,b)=>`${a} tabbladen · ${b} doc.`,noInSec:"Nog geen documenten in dit tabblad.",numsNote:"Deze nummers staan ook op de papieren in de map",
@@ -514,6 +526,7 @@ function homeView(){
   return`<div class="top"><span class="logo2">Ordo<span class="ring" aria-hidden="true"></span></span>${avatars()}</div><div class="greet"><p class="sub" style="font-size:13.5px">${todayStr()}</p><h1>${greet()}${LANG==="ar"?"،":","} ${esc(cap(member.display_name))}</h1><span class="smart${att.length?" warn":""}"><i></i>${att.length?t("smartSome",att.length,nd):t("smartNone")}</span></div>
   <section class="hero"><div class="hero-top"><div><span class="hk">${t("homeLib")}</span><b class="hv">${docs.length} <small>${t("papers",docs.length)}</small></b></div></div>
   <div class="hshelf2">${binders.map(b=>{const n=docs.filter(d=>d.binder_id===b.id).length;const hot=b.id===window.lastFiled;return`<button class="spine${hot?" glow":""}" data-binder="${b.id}" aria-label="${esc(tn(b.name))}">${n?`<span class="cntb${hot?" bump":""}">${n}</span>`:""}${ordner(b,214)}</button>`}).join("")}</div><div class="hplank"></div></section>
+  ${pendCards()}
   ${att.length?`<h2>${t("attention")}</h2>${att.map(d=>{const b=binderOf(d.binder_id);const n=daysLeft(d.deadline),urg=n<=7;return`<button class="card att" data-doc="${d.id}"><span class="cnt" style="background:${urg?"var(--redbg)":"var(--amberbg)"};color:${urg?"var(--red)":"var(--amber)"}">${n<0?`<small>${t("over")}</small>`:n===0?`<b>!</b><small>${t("today")}</small>`:`<b>${n}</b><small>${t("dayw",n)}</small>`}</span><span style="flex:1;display:flex;flex-direction:column"><span class="t"><b>${esc(d.title||d.sender)}</b></span><p>${esc(d.action||d.summary||"")}</p><span class="loc" style="color:${b?b.color:"#999"}">${esc(locText(d))}</span></span></button>`}).join("")}`:""}
   ${docs.length?`<h2>${t("recent")}</h2>`:""}
   ${docs.length?`<div class="card" style="padding:2px 16px">${docs.slice(0,8).map(docRow).join("")}</div>`:`<div class="card start2"><div class="s2-art" aria-hidden="true" style="--fx:${LANG==="ar"?"-96px":"96px"}"><div class="s2-frame"><b></b><b></b><b></b><b></b></div><div class="s2-paper"><i></i><i></i><i></i><i style="width:70%"></i><i style="width:45%"></i><em>2 · 01</em><span class="s2-scan"></span></div><div class="s2-bin">${(binders.length?binders:DEMO).slice(0,3).map((b,i)=>`<span class="${i===1?"b2":""}">${ordner(b,0,true)}</span>`).join("")}</div></div>
@@ -592,18 +605,25 @@ $("#scanBtn").onclick=()=>{SC.pages=[];liveOpen()};
 $("#file").onchange=e=>{const f=e.target.files[0];if(f)scnTake(f)};
 $("#scnX").onclick=scnClose;
 function aiCopy(blob){return new Promise(ok=>{const u=URL.createObjectURL(blob),i=new Image();i.onload=()=>{const k=Math.min(1,1300/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL("image/jpeg",.72).split(",")[1])};i.src=u})}
-async function analyzeAndFile(imgs){
-  openSheet(`<div class="spin"></div><p style="text-align:center;font-weight:600;font-size:17px" id="stage">${t("reading")}</p><p class="sub" style="text-align:center;margin-top:6px">${t("readingSub")}</p>`);
-  const {data:{session}}=await sb.auth.getSession();
-  const up=startUploads(imgs);
-  const small=await Promise.all(imgs.slice(0,4).map(x=>aiCopy(x.blob)));
-  let res;try{
+// reading runs in the background, so the family can keep scanning
+const pending=[];
+function analyzeAndFile(imgs){const it={id:crypto.randomUUID(),imgs,thumb:URL.createObjectURL(imgs[0].blob),n:imgs.length,status:"reading"};pending.unshift(it);
+  if(view!=="home"){view="home"}render();scrollTo(0,0);runRead(it)}
+async function runRead(it){
+  it.status="reading";render();
+  const imgs=it.imgs;let up;
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    up=startUploads(imgs);
+    const small=await Promise.all(imgs.slice(0,4).map(x=>aiCopy(x.blob)));
     const call=async()=>{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),90000);try{const r=await fetch(SUPABASE_URL+"/functions/v1/analyze",{signal:ctl.signal,method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY},body:JSON.stringify({images:small,lang:LANG})});let j;try{j=await r.json()}catch(e){j={error:"HTTP "+r.status}}if(!r.ok||j.error){const e=new Error(j.error||r.status);e.retry=r.status>=500;throw e}return j}finally{clearTimeout(tm)}};
-    try{res=await call()}catch(e){if(!e.retry)throw e;await new Promise(r=>setTimeout(r,1500));res=await call()}
-  }catch(err){up.p.then(ps=>sb.storage.from("scans").remove(ps)).catch(()=>{});return failSheet(t("readFail"),String(err.message||err))}
-  $("#stage").textContent=t("saving");
-  try{const d=await fileDoc(res,imgs,up);showFiled(d,true)}catch(err){failSheet(t("saveFail"),String(err.message||err))}
-}
+    let res;try{res=await call()}catch(e){if(!e.retry)throw e;await new Promise(r=>setTimeout(r,1500));res=await call()}
+    const d=await fileDoc(res,imgs,up);
+    pending.splice(pending.indexOf(it),1);URL.revokeObjectURL(it.thumb);
+    window.lastFiled=d.binder_id;clearTimeout(window.lfT);window.lfT=setTimeout(()=>{window.lastFiled=null},4000);render();
+    if($("#live").hidden&&$("#scn").hidden&&!$("#ov").classList.contains("on"))showFiled(d,true);else toast(t("filedTo")+" "+locText(d));
+  }catch(err){if(up)up.p.then(ps=>sb.storage.from("scans").remove(ps)).catch(()=>{});it.status="error";it.err=String(err.message||err);render()}}
+function pendCards(){return pending.map(it=>`<div class="card pend${it.status==="error"?" err":""}"><span class="pthumb"><img src="${it.thumb}" alt="">${it.n>1?`<b>${it.n}</b>`:""}</span><span style="flex:1;min-width:0">${it.status==="error"?`<b>${t("readFail")}</b><span class="sub" style="display:block;margin-top:2px">${esc(it.err||"")}</span><span style="display:flex;gap:8px;margin-top:10px"><button class="chip on" data-retry="${it.id}">${t("retry")}</button><button class="chip" data-drop="${it.id}">${t("cancel")}</button></span>`:`<b>${t("pendReading")}</b><span class="shim"></span>`}</span>${it.status==="reading"?'<span class="spin sm"></span>':""}</div>`).join("")}
 // ===== Scanner: edge detection, perspective flattening, scanner look =====
 const SC={pages:[],src:null,q:null,mode:"color",out:null,step:"edit"};
 function scnLoad(file){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,2400/Math.max(i.naturalWidth,i.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(i.naturalWidth*k);c.height=Math.round(i.naturalHeight*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};i.onerror=bad;i.src=u})}
@@ -830,6 +850,8 @@ function confirmDel(d){openSheet(`<h1 style="font-size:22px">${t("delQ")}</h1><p
 // ===== Clicks =====
 document.addEventListener("click",e=>{
   const lEl=e.target.closest("[data-lang]");if(lEl){setLang(lEl.dataset.lang);return}
+  const rEl=e.target.closest("[data-retry]");if(rEl){const it=pending.find(x=>x.id===rEl.dataset.retry);if(it)runRead(it);return}
+  const xEl=e.target.closest("[data-drop]");if(xEl){const i=pending.findIndex(x=>x.id===xEl.dataset.drop);if(i>=0){URL.revokeObjectURL(pending[i].thumb);pending.splice(i,1);render()}return}
   const dEl=e.target.closest("[data-doc]");if(dEl){const d=docs.find(x=>x.id===dEl.dataset.doc);if(d)showFiled(d,false);return}
   const bEl=e.target.closest("[data-binder]");if(bEl){const go=()=>{openBinder=bEl.dataset.binder;openSection=null;view="binder";render();scrollTo(0,0)};if(bEl.classList.contains("spine")&&!matchMedia("(prefers-reduced-motion:reduce)").matches){bEl.classList.add("pull");setTimeout(go,240)}else go();return}
   const sEl=e.target.closest("[data-sec]");if(sEl){openSection=sEl.dataset.sec;render();return}
