@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F4F5F7">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ordo">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADWUlEQVR42u3dzXEUMRCG4bFqrxSUucCBKEiDDMiBYMjBGZAGUXDgRBVVJMDBFw6AvbPz0/3pecs327u96nda0s5Iunt5/2YB/sbQBCAHyAFygBwgB8gBcoAcIAfIAZAD5AA5QA6QA+QAOUAOkAPkAMgBcoAcIAfIAXKAHCAH0rhogm+f3//rV+8+fVU5mLHmt+SY1wx+DGbwgxw35XtOP8xWQA6QA+QAOUAOkAPkADlADpADIAfIAXKAHCAHyHEeP398f/w5+H8XT59XdmKPV3v1+i05ODGpJRdabPV2eYpcaEGRfDmKDBWTFLnQgiKxU9nKc8vu894xpxkvPn7Z9e8z/Lhrepb9Jo3+6+HDrmb8SccuZszclTwn65uY0bSEjMkHGf/P/VZmNPWjWbcScGujUf8ymOFTtK8cO7Xpk9fxWe9LjnPMWJ2YImGQY/uUbJiMgiEtvj4vkoPHF4x/8Kd65bgxAQdcmvUjzJyttGj3G9+lcvmpWzluabVTLsd2Ac/4gPFZDZ33JNgIKxvnZqjIJFnlKHrtJtWPEVM26mRlXSQFi8dQM9SPNnKsuIBqZmJFVNWKh7WyaCJHTNnIKB7DUMPgQ7eCznJcW1G7XJTXxlmnZ1E5ECdHr7686chjeOx28RCybgVTyNGxSlsOCZUD5DAanbxNhs5b5LoVkAPkADlADpAD5AA5QA6QA7APqch7yRF/HlbTNtGtgBywMb6YVQ7MJIcxacHWGKaFotWtoLMcfRccpy4QVzngdEgRdpcjYJO1pF2sdCvoI0dM8QjY/G5YPGio0UmO7ttDd9+eO3PMUcGPpEXhI+zmwrm5aXoSyESzlbP8yNtIovQBgF3O1ks9A3AE37k+5lIOPh1yikOHd0pA2cAWhw5fm8WCJ1IbczjL3ln2PecCT2borPclx6TFvMsDs0Ob+hQhX4J196NX/PYhFbmN8cWcPSBtOkTtW+qcDsmM3LuyYefK6lbyu5iMWXeOHEUUSVoRnibHiYrkbRSQKcfBiqTuH5Esh5tn5Djaknn2mZlLjnWuTLvr0NRyYLGQGuQAOUAOkAPkADlADpAD5ADIAXKAHCAHyAFygBwgB8gBcgDkADlADpAD5AA5QA6QA+QAOQBygBwgB8gBcoAcKMxv5gxP6g1bU6YAAAAASUVORK5CYII=">
+<title>Ordo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--bg:#F4F5F7;--card:#FFFFFF;--ink:#14171F;--mute:#5E6675;--line:#E3E6EB;--soft:#EEF0F3;--red:#A3341F;--redbg:#FCE8E4;--amber:#8A5A00;--amberbg:#FFF1D6;--ok:#1F9D6B}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg)}
+body{font-family:"Readex Pro",system-ui,sans-serif;color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #2F5BD3;outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;min-height:100vh;position:relative;padding:calc(env(safe-area-inset-top) + 20px) 22px calc(170px + env(safe-area-inset-bottom))}
+.brand{display:flex;align-items:center;gap:7px;direction:ltr;justify-content:flex-end;font-weight:700;font-size:17px;letter-spacing:-.4px}
+.ring{width:20px;height:20px;border-radius:50%;border:4px solid currentColor;position:relative;display:block}
+.ring::after{content:"";position:absolute;left:50%;top:-6px;width:4px;height:6px;margin-left:-2px;background:#F2A44B;border-radius:2px}
+h1{font-size:27px;font-weight:700;letter-spacing:-.3px;line-height:1.3}
+h2{font-size:15px;font-weight:600;color:var(--mute);margin:26px 0 10px}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.avs{display:flex}
+.av{width:38px;height:38px;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:600;font-size:15px;border:3px solid var(--bg)}
+.av+.av{margin-right:-12px}
+.card{background:var(--card);border-radius:20px;box-shadow:0 1px 0 var(--line)}
+.att{display:flex;gap:14px;padding:16px;margin-bottom:12px;width:100%;text-align:start}
+.bar{width:6px;border-radius:3px;align-self:stretch;flex:none}
+.att .t{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.att b{font-size:16px;font-weight:600}
+.att p{font-size:13.5px;color:var(--mute);line-height:1.55;margin:6px 0}
+.loc{font-size:12.5px;font-weight:500}
+.pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.p-red{color:var(--red);background:var(--redbg)}.p-amb{color:var(--amber);background:var(--amberbg)}.p-ok{color:#146B49;background:#DDF3E9}.p-mute{color:var(--mute);background:var(--soft)}
+.row{display:flex;align-items:center;gap:12px;padding:11px 0;width:100%;text-align:start}
+.row+.row{border-top:1px solid var(--line)}
+.thumb{width:40px;height:48px;border-radius:8px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);display:flex;flex-direction:column;gap:4px;padding:9px 7px;flex:none;overflow:hidden}
+.thumb i{height:3px;border-radius:2px;background:#D5D9E0;display:block}
+.thumb img{width:100%;height:100%;object-fit:cover;margin:-9px -7px;width:40px;height:48px}
+.grow{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.grow span:first-child{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub{font-size:12.5px;color:var(--mute)}
+.code{font-size:12px;font-weight:600;padding:5px 9px;border-radius:8px;white-space:nowrap;direction:ltr}
+.empty{text-align:center;padding:30px 16px;color:var(--mute);line-height:1.7;font-size:14.5px}
+.dock{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(rgba(244,245,247,0),var(--bg) 26%);padding:26px 22px calc(18px + env(safe-area-inset-bottom));z-index:10}
+.dock-in{max-width:516px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.scan{height:64px;border-radius:22px;background:var(--ink);color:#fff;font-size:18px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:0 12px 26px -14px rgba(20,23,31,.8)}
+nav{display:flex;justify-content:space-around}
+nav button{font-size:12px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px;min-height:44px}
+nav button.on{color:var(--ink);font-weight:600}
+.shelf{padding:22px 16px 0;margin-top:24px}
+.spines{display:flex;gap:10px;align-items:flex-end;justify-content:center;height:330px}
+.spine{width:58px;border-radius:10px 10px 6px 6px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:14px 0 12px;transition:transform .2s}
+.spine:active{transform:translateY(4px)}
+.spine .n{font-size:26px;font-weight:700}
+.spine .v{writing-mode:vertical-rl;font-size:15px;font-weight:600}
+.spine .h{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.65)}
+.ledge{height:14px;margin:0 -16px;border-radius:0 0 26px 26px;background:var(--line)}
+.bhead{color:#fff;margin:calc(-20px - env(safe-area-inset-top)) -22px 0;padding:calc(env(safe-area-inset-top) + 24px) 22px 22px;border-radius:0 0 30px 30px;display:flex;flex-direction:column;gap:16px}
+.back{color:inherit;font-size:14px;display:flex;align-items:center;gap:6px;align-self:flex-start;min-height:36px}
+.big{width:64px;height:64px;border-radius:18px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:34px;font-weight:700;flex:none}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+.chip{font-size:14px;padding:9px 14px;border-radius:14px;background:rgba(255,255,255,.16);white-space:nowrap;color:#fff}
+.chip.on{background:#fff;color:var(--ink);font-weight:600}
+.dnum{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-weight:700;font-size:16px;flex:none;direction:ltr}
+.search{display:flex;align-items:center;gap:10px;height:54px;padding:0 16px;background:#fff;border-radius:18px;box-shadow:inset 0 0 0 2px var(--ink);margin-top:16px}
+.search input{flex:1;border:0;outline:0;font-size:16px;background:transparent}
+.res{overflow:hidden;margin-bottom:12px;width:100%;text-align:start}
+.res .in{padding:16px;display:flex;gap:14px}
+.res .where{padding:12px 16px;display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:#fff}
+/* sheets */
+.ov{position:fixed;inset:0;background:rgba(20,23,31,.45);display:none;align-items:flex-end;justify-content:center;z-index:30}
+.ov.on{display:flex}
+.sheet{background:var(--bg);width:100%;max-width:560px;border-radius:28px 28px 0 0;max-height:94vh;overflow:auto;padding:12px 22px calc(26px + env(safe-area-inset-bottom));animation:up .25s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(60px);opacity:.3}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+.grab{width:42px;height:5px;border-radius:3px;background:#D5D9E0;margin:0 auto 16px}
+.btn{height:58px;border-radius:20px;font-size:17px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px;width:100%}
+.b-ink{background:var(--ink);color:#fff}.b-soft{background:#fff;box-shadow:inset 0 0 0 1px var(--line)}.b-red{background:var(--redbg);color:var(--red)}
+.btns{display:flex;gap:10px;margin-top:16px}
+.field{display:block;margin-top:14px}
+.field span{display:block;font-size:13px;color:var(--mute);margin-bottom:6px}
+.field input{width:100%;height:52px;border-radius:14px;border:1.5px solid var(--line);background:#fff;padding:0 14px;font-size:16px}
+.field input:focus{border-color:var(--ink);outline:0}
+.err{color:var(--red);font-size:14px;margin-top:12px;line-height:1.5}
+.spin{width:52px;height:52px;border:4px solid var(--line);border-top-color:var(--ink);border-radius:50%;margin:30px auto 18px;animation:rot 1s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.place{border-radius:26px;padding:18px 18px 20px;color:#fff;display:flex;flex-direction:column;gap:14px;margin-top:10px}
+.tabs{display:flex;flex-direction:column;gap:6px;width:112px;flex:none}
+.tabs span{font-size:12.5px;background:rgba(255,255,255,.16);padding:7px 10px;border-radius:10px 0 0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tabs span.on{background:#fff;font-weight:600;margin-left:-18px;box-shadow:0 4px 10px -4px rgba(0,0,0,.3)}
+.stack{flex:1;position:relative;height:128px}
+.stack .s{position:absolute;border-radius:6px;height:74px}
+.paper{position:absolute;left:0;right:10px;bottom:34px;height:86px;background:#fff;border-radius:8px;transform:rotate(-3deg);box-shadow:0 16px 24px -12px rgba(0,0,0,.45);padding:10px 12px;display:flex;flex-direction:column;gap:6px;color:var(--ink);animation:drop .6s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes drop{from{transform:translateY(-60px) rotate(-12deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){.paper{animation:none}}
+.paper i{height:3px;border-radius:2px;background:#D5D9E0;display:block}
+.hl{font-size:14px;font-weight:700;background:#FFE58A;padding:1px 8px;border-radius:6px;direction:ltr}
+.info{padding:16px 18px;display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.info .k{font-size:12.5px;font-weight:600;color:var(--mute)}
+.info p{font-size:15px;line-height:1.65}
+.dl{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--soft);font-size:14px}
+.pages{display:flex;gap:10px;overflow-x:auto;margin-top:16px}
+.pages img{height:260px;border-radius:12px;box-shadow:0 1px 0 var(--line)}
+.picks{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.pick{display:flex;align-items:center;gap:12px;padding:12px 14px;width:100%;text-align:start}
+.sw{width:14px;height:14px;border-radius:4px;flex:none}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 14px);transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:16px;font-size:14px;z-index:50;display:none;max-width:90vw}
+.hello{min-height:100vh;background:#0F1218;color:#fff;margin:calc(-20px - env(safe-area-inset-top)) -22px calc(-170px - env(safe-area-inset-bottom));padding:calc(env(safe-area-inset-top) + 44px) 28px 40px;display:flex;flex-direction:column}
+.hello .field span{color:#A9B0BE}
+.hello .field input{background:#1C2029;border-color:#2A303C;color:#fff}
+.hello .field input:focus{border-color:#fff}
+.hshelf{position:relative;height:300px;margin-top:24px}
+.hshelf div{position:absolute;bottom:14px;width:52px;border-radius:9px 9px 4px 4px;display:flex;justify-content:center;padding-top:12px;font-weight:700;font-size:22px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<div class="dock" id="dock" hidden><div class="dock-in">
+<button class="scan" id="scanBtn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M8 12h8"/></svg>صوّر ورقة جديدة</button>
+<nav id="nav">
+<button data-v="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>الرئيسية</button>
+<button data-v="lib"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3v16H5zM10.5 4h3v16h-3zM16 5l3 .8-3.6 14.4-3-.8"/></svg>المكتبة</button>
+<button data-v="search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>البحث</button>
+<button data-v="more"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>العائلة</button>
+</nav>
+</div></div>
+<input type="file" id="file" accept="image/*" capture="environment" multiple hidden>
+<div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+const SUPABASE_URL="https://wzpvrsfxnzuwdajipzms.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6cHZyc2Z4bnp1d2Rhamlwem1zIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU0NTExMDgsImV4cCI6MjExMTAyNzEwOH0.qFmg2brt26ITh8pXFAL9YzCAVc1hor2o2AcGNXMY-wE";
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
+
+// ===== State =====
+let me=null,member=null,household=null,members=[],binders=[],sections=[],docs=[],view="home",openBinder=null,openSection=null,query="";
+const AVC=["#2F5BD3","#1F9D6B","#8A5CC7","#D2463A"];
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pad=n=>String(n??"").padStart(2,"0");
+const tint=(hex,a)=>{const n=parseInt(hex.slice(1),16);return`rgba(${n>>16},${n>>8&255},${n&255},${a})`};
+const darkText=hex=>{const n=parseInt(hex.slice(1),16),r=n>>16,g=n>>8&255,b=n&255;return(r*299+g*587+b*114)/1000>170};
+const binderOf=id=>binders.find(b=>b.id===id);
+const sectionOf=id=>sections.find(s=>s.id===id);
+const MONTHS=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const fmtDate=d=>{if(!d)return"";const x=new Date(d);return`${x.getDate()} ${MONTHS[x.getMonth()]} ${x.getFullYear()}`};
+const daysLeft=d=>Math.ceil((new Date(d+"T23:59:59")-new Date())/864e5);
+function toast(t){const e=$("#toast");e.textContent=t;e.style.display="block";clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display="none",2600)}
+function locText(d){const b=binderOf(d.binder_id),s=sectionOf(d.section_id);return b?`الملف ${b.number} · ${s?s.name:"—"} · رقم ${pad(d.doc_no)}`:"غير مصنّف"}
+function codeChip(d){const b=binderOf(d.binder_id);if(!b)return"";return`<span class="code" style="background:${tint(b.color,.18)}">${b.number} · ${pad(d.doc_no)}</span>`}
+function dlPill(d){if(!d.deadline||d.done)return"";const n=daysLeft(d.deadline);if(n<0)return`<span class="pill p-red">انتهى الموعد</span>`;if(n===0)return`<span class="pill p-red">اليوم!</span>`;return`<span class="pill ${n<=14?"p-red":"p-amb"}">باقي ${n} ${n===1?"يوم":n<=10?"أيام":"يوماً"}</span>`}
+function greet(){const h=new Date().getHours();return h<12?"صباح الخير":h<18?"نهارك سعيد":"مساء الخير"}
+
+// ===== Data =====
+async function loadAll(){
+  const {data:m}=await sb.from("members").select("user_id,household_id,display_name");
+  members=m||[];member=members.find(x=>x.user_id===me.id)||null;
+  if(!member)return;
+  const [h,b,s,d]=await Promise.all([
+    sb.from("households").select("*").single(),
+    sb.from("binders").select("*").order("number"),
+    sb.from("sections").select("*").order("sort"),
+    sb.from("documents").select("id,binder_id,section_id,doc_no,title,sender,summary,action,deadline,doc_date,full_text,image_paths,done,created_by,created_at").order("created_at",{ascending:false})
+  ]);
+  household=h.data;binders=b.data||[];sections=s.data||[];docs=d.data||[];
+}
+
+// ===== Render =====
+function render(){
+  const app=$("#app");
+  if(!me){$("#dock").hidden=true;app.innerHTML=authView();bindAuth();return}
+  if(!member){$("#dock").hidden=true;app.innerHTML=setupView();bindSetup();return}
+  $("#dock").hidden=false;
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===view||(view==="binder"&&b.dataset.v==="lib")));
+  app.innerHTML=view==="home"?homeView():view==="lib"?libView():view==="binder"?binderView():view==="search"?searchView():moreView();
+  if(view==="search"){const i=$("#q");i.oninput=()=>{query=i.value;$("#results").innerHTML=searchResults()};}
+}
+function avatars(){return`<div class="avs" role="img" aria-label="${esc(members.map(m=>m.display_name).join(" و "))}">${members.map((m,i)=>`<span class="av" style="background:${AVC[i%4]}">${esc((m.display_name||"?").slice(0,1))}</span>`).join("")}</div>`}
+function docRow(d){
+  const b=binderOf(d.binder_id),c=b?b.color:"#D5D9E0";
+  const who=members.find(m=>m.user_id===d.created_by);
+  return`<button class="row" data-doc="${d.id}"><span class="thumb"><i></i><i style="width:70%"></i><i style="width:50%;background:${c}"></i></span><span class="grow"><span>${esc(d.title||d.sender||"ورقة")}</span><span class="sub">${esc(d.sender||"")}${who?" · "+esc(who.display_name):""}</span></span>${codeChip(d)}</button>`}
+function homeView(){
+  const att=docs.filter(d=>d.deadline&&!d.done&&daysLeft(d.deadline)>=-7).sort((a,b)=>a.deadline.localeCompare(b.deadline));
+  return`<div class="top"><div><span class="brand">Ordo<span class="ring" aria-hidden="true"></span></span><h1 style="margin-top:6px">${greet()}، ${esc(member.display_name)}</h1></div>${avatars()}</div>
+  ${att.length?`<h2>تحتاج انتباهكم</h2>${att.map(d=>{const b=binderOf(d.binder_id);return`<button class="card att" data-doc="${d.id}"><span class="bar" style="background:${b?b.color:"#999"}"></span><span style="flex:1;display:flex;flex-direction:column"><span class="t"><b>${esc(d.title||d.sender)}</b>${dlPill(d)}</span><p>${esc(d.action||d.summary||"")}</p><span class="loc" style="color:${b?b.color:"#999"}">${esc(locText(d))}</span></span></button>`}).join("")}`:""}
+  <h2>آخر الأوراق</h2>
+  ${docs.length?`<div class="card" style="padding:2px 16px">${docs.slice(0,8).map(docRow).join("")}</div>`:`<div class="card empty">لا توجد أوراق بعد.<br>صوّر أول رسالة، وسيقول لك Ordo أين تضعها.</div>`}`}
+function libView(){
+  const heights=[318,330,306,324,312,300,320,310];
+  return`<h1>المكتبة</h1><span class="sub" style="font-size:14px">${binders.length} ملفات في الدرج · ${docs.length} ورقة</span>
+  <div class="card shelf" style="border-radius:26px"><div class="spines">${binders.map((b,i)=>`<button class="spine" data-binder="${b.id}" style="height:${heights[i%8]}px;background:${b.color};color:${darkText(b.color)?"#14171F":"#fff"}"><span class="n">${b.number}</span><span class="v">${esc(b.name)}</span><span class="h" style="border-color:${darkText(b.color)?"rgba(20,23,31,.45)":"rgba(255,255,255,.65)"}"></span></button>`).join("")}</div><div class="ledge"></div></div>
+  <div class="card" style="padding:4px 16px;margin-top:20px">${binders.map(b=>{const n=docs.filter(d=>d.binder_id===b.id).length,ns=sections.filter(s=>s.binder_id===b.id).length;return`<button class="row" data-binder="${b.id}"><span class="sw" style="background:${b.color}"></span><span class="grow"><span style="font-weight:600">${b.number} · ${esc(b.name)}</span></span><span class="sub">${ns} أقسام · ${n} ورقة</span></button>`}).join("")}</div>`}
+function binderView(){
+  const b=binderOf(openBinder);if(!b){view="lib";return libView()}
+  const secs=sections.filter(s=>s.binder_id===b.id);
+  if(!openSection||!secs.find(s=>s.id===openSection))openSection=secs[0]&&secs[0].id;
+  const list=docs.filter(d=>d.section_id===openSection).sort((x,y)=>(y.doc_no||0)-(x.doc_no||0));
+  const dk=darkText(b.color);
+  return`<div class="bhead" style="background:${b.color};color:${dk?"#14171F":"#fff"}"><button class="back" data-go="lib"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>المكتبة</button>
+  <div style="display:flex;align-items:center;gap:16px"><span class="big">${b.number}</span><div><h1 style="font-size:24px">${esc(b.name)}</h1><span style="font-size:13.5px;opacity:.85">${docs.filter(d=>d.binder_id===b.id).length} ورقة</span></div></div>
+  <div class="chips">${secs.map(s=>`<button class="chip ${s.id===openSection?"on":""}" data-sec="${s.id}" style="${dk&&s.id!==openSection?"color:#14171F":""}">${esc(s.name)} · ${docs.filter(d=>d.section_id===s.id).length}</button>`).join("")}</div></div>
+  <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">${list.length?list.map(d=>`<button class="card" data-doc="${d.id}" style="padding:14px;display:flex;gap:14px;align-items:center;text-align:start;width:100%"><span class="dnum" style="background:${tint(b.color,.18)}">${pad(d.doc_no)}</span><span class="grow"><span style="font-weight:600">${esc(d.title||d.sender)}</span><span class="sub">${fmtDate(d.doc_date||d.created_at)}</span></span>${d.deadline&&!d.done?`<span class="pill p-red">${fmtDate(d.deadline).replace(/ \d{4}$/,"")}</span>`:""}</button>`).join(""):`<div class="card empty">لا أوراق في هذا القسم بعد.</div>`}</div>
+  <p class="sub" style="text-align:center;margin-top:18px">الأرقام هنا هي نفس الأرقام المكتوبة على الأوراق في الملف</p>`}
+function searchResults(){
+  const q=query.trim().toLowerCase();if(!q)return`<p class="sub">اكتب اسم الجهة أو موضوع الرسالة، مثل: Wohngeld، AOK، قرار، فاتورة.</p>`;
+  const words=q.split(/\s+/);
+  const r=docs.filter(d=>{const t=[d.title,d.sender,d.summary,d.action,d.full_text,sectionOf(d.section_id)?.name].join(" ").toLowerCase();return words.every(w=>t.includes(w))});
+  if(!r.length)return`<div class="card empty">لم أجد ورقة بهذا الاسم.</div>`;
+  return`<p class="sub" style="margin-bottom:12px">وجدت ${r.length} ${r.length===1?"ورقة":"أوراق"}</p>`+r.map(d=>{const b=binderOf(d.binder_id),c=b?b.color:"#5E6675";return`<button class="card res" data-doc="${d.id}"><span class="in"><span class="grow"><span style="font-size:16px;font-weight:600">${esc(d.title||d.sender)}</span><span class="sub">${esc(d.sender||"")} · ${fmtDate(d.doc_date||d.created_at)}</span><span class="sub" style="line-height:1.5;white-space:normal">${esc(d.summary||"")}</span></span></span><span class="where" style="background:${c};color:${darkText(c)?"#14171F":"#fff"}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>الأصل في: ${esc(locText(d))}</span></button>`}).join("")}
+function searchView(){return`<h1>البحث</h1><label class="search" for="q"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><input id="q" value="${esc(query)}" placeholder="ابحث في كل الأوراق" autocomplete="off"></label><div id="results" style="margin-top:20px">${searchResults()}</div>`}
+function moreView(){return`<h1>العائلة</h1>
+  <div class="card" style="padding:18px;margin-top:20px;display:flex;flex-direction:column;gap:14px">${members.map((m,i)=>`<div style="display:flex;align-items:center;gap:12px"><span class="av" style="background:${AVC[i%4]};border-color:#fff">${esc(m.display_name.slice(0,1))}</span><span style="font-weight:600">${esc(m.display_name)}${m.user_id===me.id?' <span class="sub">(أنت)</span>':""}</span></div>`).join("")}</div>
+  <h2>أضف دلال أو فرداً آخر</h2>
+  <div class="card" style="padding:18px;line-height:1.7;font-size:14.5px">على جوالها: تفتح Ordo، وتنشئ حساباً بإيميلها، ثم تختار "عندي رمز العائلة" وتكتب هذا الرمز:
+  <div style="font-size:34px;font-weight:700;letter-spacing:6px;text-align:center;margin:14px 0 4px;direction:ltr">${esc(household.invite_code)}</div></div>
+  <div class="btns"><button class="btn b-soft" id="logout">تسجيل الخروج</button></div>
+  <p class="sub" style="text-align:center;margin-top:18px">${esc(me.email)}</p>`}
+
+// ===== Auth & setup =====
+function hello(inner){return`<div class="hello"><div style="display:flex;align-items:center;gap:10px;direction:ltr;justify-content:flex-end"><span style="font-size:30px;font-weight:700;letter-spacing:-.8px">Ordo</span><span class="ring" style="width:34px;height:34px;border-width:6px" aria-hidden="true"></span></div>${inner}</div>`}
+function authView(){return hello(`<div class="hshelf" aria-hidden="true"><div style="right:20px;height:220px;background:#2F5BD3">1</div><div style="right:82px;height:258px;background:#1F9D6B">2</div><div style="right:144px;height:204px;background:#F2A44B;color:#0F1218">3</div><div style="right:206px;height:240px;background:#8A5CC7">4</div><div style="right:268px;height:216px;background:#D2463A">5</div><span style="position:absolute;bottom:0;left:0;right:0;height:14px;background:#1C2029;display:block"></span></div>
+  <h1 style="font-size:32px;margin-top:22px">كل ورقة في مكانها.<br>دائماً.</h1>
+  <form id="authForm" style="margin-top:10px">
+  <label class="field"><span>الإيميل</span><input id="email" type="email" autocomplete="email" required dir="ltr"></label>
+  <label class="field"><span>كلمة السر (8 أحرف على الأقل)</span><input id="pass" type="password" autocomplete="current-password" minlength="8" required dir="ltr"></label>
+  <p class="err" id="aerr"></p>
+  <div class="btns"><button class="btn" style="background:#fff;color:#0F1218" type="submit" id="loginBtn">دخول</button><button class="btn" style="background:#1C2029;color:#fff" type="button" id="signupBtn">حساب جديد</button></div></form>`)}
+function bindAuth(){
+  const go=async(signup)=>{const e=$("#email").value.trim(),p=$("#pass").value;$("#aerr").textContent="";
+    if(!e||p.length<8){$("#aerr").textContent="اكتب الإيميل وكلمة سر من 8 أحرف على الأقل.";return}
+    const r=signup?await sb.auth.signUp({email:e,password:p,options:{emailRedirectTo:location.href.split("#")[0]}}):await sb.auth.signInWithPassword({email:e,password:p});
+    if(r.error){$("#aerr").textContent=/Invalid login/i.test(r.error.message)?"الإيميل أو كلمة السر غير صحيحة.":/registered/i.test(r.error.message)?"هذا الإيميل مسجّل. اضغط دخول.":r.error.message;return}
+    if(signup&&!r.data.session){$("#aerr").style.color="#7FD1A8";$("#aerr").textContent="أرسلنا لك رسالة تأكيد على الإيميل. افتحها واضغط الرابط، ثم ارجع واضغط دخول.";return}
+    await start()};
+  $("#authForm").onsubmit=e=>{e.preventDefault();go(false)};$("#signupBtn").onclick=()=>go(true)}
+function setupView(){return hello(`<h1 style="font-size:28px;margin-top:40px">أهلاً بك في Ordo</h1><p style="color:#A9B0BE;line-height:1.7;margin-top:8px">ما اسمك؟ وهل تنشئ مكتبة جديدة للعائلة، أم عندك رمز من فرد في العائلة؟</p>
+  <label class="field"><span>اسمك كما تريده أن يظهر</span><input id="dname" autocomplete="given-name"></label>
+  <div class="btns" style="flex-direction:column"><button class="btn" style="background:#fff;color:#0F1218" id="newHH">أنشئ مكتبة جديدة للعائلة</button></div>
+  <label class="field" style="margin-top:26px"><span>عندي رمز العائلة</span><input id="code" dir="ltr" maxlength="6" style="letter-spacing:4px;text-transform:uppercase"></label>
+  <div class="btns"><button class="btn" style="background:#1C2029;color:#fff" id="joinHH">انضم بالرمز</button></div><p class="err" id="serr"></p>`)}
+function bindSetup(){
+  const nm=()=>{const v=$("#dname").value.trim();if(!v)$("#serr").textContent="اكتب اسمك أولاً.";return v};
+  $("#newHH").onclick=async()=>{const n=nm();if(!n)return;const r=await sb.rpc("create_household",{p_name:"البيت",p_display_name:n});if(r.error){$("#serr").textContent=r.error.message;return}await start()};
+  $("#joinHH").onclick=async()=>{const n=nm();if(!n)return;const r=await sb.rpc("join_household",{p_code:$("#code").value,p_display_name:n});if(r.error){$("#serr").textContent=/wrong code/.test(r.error.message)?"الرمز غير صحيح.":r.error.message;return}await start()}}
+
+// ===== Sheets =====
+function openSheet(html){$("#sheet").innerHTML='<div class="grab"></div>'+html;$("#ov").classList.add("on")}
+function closeSheet(){$("#ov").classList.remove("on")}
+$("#ov").addEventListener("click",e=>{if(e.target.id==="ov")closeSheet()});
+function placeCard(b,s,no){
+  const secs=sections.filter(x=>x.binder_id===b.id).slice(0,4);const dk=darkText(b.color);
+  return`<div class="place" style="background:${b.color};color:${dk?"#14171F":"#fff"}"><div style="display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:10px"><span style="width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.2);display:grid;place-items:center;font-size:22px;font-weight:700">${b.number}</span><span style="font-size:17px;font-weight:600">${esc(b.name)}</span></div>${b.place?`<span style="font-size:12.5px;opacity:.85">${esc(b.place)}</span>`:""}</div>
+  <div style="display:flex;gap:10px;align-items:flex-end;height:128px"><div class="tabs">${secs.map(x=>`<span class="${x.id===s.id?"on":""}" style="${x.id===s.id?`color:${b.color}`:""}">${esc(x.name)}</span>`).join("")}</div>
+  <div class="stack"><span class="s" style="left:18px;right:6px;bottom:0;background:rgba(255,255,255,.35)"></span><span class="s" style="left:12px;right:12px;bottom:6px;background:rgba(255,255,255,.55)"></span>${no>1?`<span class="s" style="left:6px;right:18px;bottom:12px;background:rgba(255,255,255,.75);color:${b.color};font-size:12px;font-weight:600;padding:6px 9px;direction:ltr;text-align:right">${pad(no-1)}</span>`:""}
+  <div class="paper"><div style="display:flex;justify-content:space-between;align-items:center"><i style="width:46%;background:${b.color}"></i><span class="hl">${pad(no)}</span></div><i></i><i style="width:80%"></i><i style="width:60%"></i></div></div></div></div>`}
+
+// ----- Scan → analyse → file -----
+$("#scanBtn").onclick=()=>{$("#file").value="";$("#file").click()};
+$("#file").onchange=async e=>{
+  const files=[...e.target.files].slice(0,4);if(!files.length)return;
+  openSheet(`<div class="spin"></div><p style="text-align:center;font-weight:600;font-size:17px" id="stage">أقرأ الرسالة…</p><p class="sub" style="text-align:center;margin-top:6px">Claude يقرأها ويقرّر مكانها</p>`);
+  let imgs;try{imgs=await Promise.all(files.map(f=>shrink(f,1600,.82)))}catch(err){return failSheet("لم أستطع فتح الصورة.")}
+  const {data:{session}}=await sb.auth.getSession();
+  let res;try{
+    const r=await fetch(SUPABASE_URL+"/functions/v1/analyze",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY},body:JSON.stringify({images:imgs.map(x=>x.b64),lang:"ar"})});
+    res=await r.json();if(!r.ok||res.error)throw new Error(res.error||r.status);
+  }catch(err){return failSheet("لم تنجح القراءة. تأكد من الإنترنت وجرّب مرة أخرى.",String(err.message||err))}
+  $("#stage").textContent="أحفظ الورقة في مكانها…";
+  try{const d=await fileDoc(res,imgs);showFiled(d,true)}catch(err){failSheet("لم أستطع الحفظ.",String(err.message||err))}
+};
+function failSheet(t,detail){openSheet(`<h2 style="color:var(--ink);font-size:20px;margin:6px 0 10px">${esc(t)}</h2>${detail?`<p class="sub" style="direction:ltr;text-align:left">${esc(detail)}</p>`:""}<div class="btns"><button class="btn b-ink" onclick="closeSheet()">حسناً</button></div>`)}
+function shrink(file,max,q){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);c.toBlob(bl=>{const fr=new FileReader();fr.onload=()=>ok({blob:bl,b64:fr.result.split(",")[1]});fr.readAsDataURL(bl)},"image/jpeg",q);URL.revokeObjectURL(u)};i.onerror=bad;i.src=u})}
+async function fileDoc(res,imgs){
+  let sec=sectionOf(res.section_id)||sections.find(s=>s.name==="متفرقات")||sections[0];
+  const no=(await sb.rpc("next_doc_no",{p_section:sec.id})).data;
+  const id=crypto.randomUUID();const paths=[];
+  for(let k=0;k<imgs.length;k++){const p=`${household.id}/${id}/${k+1}.jpg`;const up=await sb.storage.from("scans").upload(p,imgs[k].blob,{contentType:"image/jpeg"});if(up.error)throw up.error;paths.push(p)}
+  const row={id,household_id:household.id,binder_id:sec.binder_id,section_id:sec.id,doc_no:no,title:res.title||null,sender:res.sender||null,summary:res.summary||null,action:res.action||null,deadline:res.deadline||null,doc_date:res.doc_date||null,full_text:res.important_text||null,image_paths:paths,created_by:me.id};
+  const ins=await sb.from("documents").insert(row).select().single();if(ins.error)throw ins.error;
+  docs.unshift(ins.data);render();return ins.data}
+function showFiled(d,isNew){
+  const b=binderOf(d.binder_id),s=sectionOf(d.section_id);
+  openSheet(`<div style="display:flex;justify-content:space-between;align-items:center"><button class="back" onclick="closeSheet()" style="color:var(--ink)">إغلاق</button>${isNew?`<span class="pill p-ok">قُرئت وحُفظت</span>`:""}</div>
+  <span class="sub" style="display:block;margin-top:8px">${esc(d.sender||"")}</span><h1 style="font-size:22px;margin-top:4px">${esc(d.title||"رسالة")}</h1>
+  <div class="card info"><div><span class="k">ماذا يريدون؟</span><p>${esc(d.summary||"—")}</p></div>${d.action?`<div><span class="k">ما المطلوب منكم</span><p>${esc(d.action)}</p></div>`:""}
+  ${d.deadline?`<div class="dl"><span class="sub">الرد قبل</span><span style="font-weight:600;color:var(--red)">${fmtDate(d.deadline)}${!d.done&&daysLeft(d.deadline)>=0?` · باقي ${daysLeft(d.deadline)} يوماً`:""}</span></div>`:""}</div>
+  ${b&&s?`<h2 style="color:var(--ink)">${isNew?"ضع الورقة الأصلية هنا":"مكان الورقة الأصلية"}</h2>${placeCard(b,s,d.doc_no)}<p class="sub" style="margin-top:10px;line-height:1.6">${isNew?`اكتب <b style="color:var(--ink)">${pad(d.doc_no)}</b> في زاوية الورقة، وضعها في قسم ${esc(s.name)}. نسختها محفوظة في نفس المكان داخل Ordo.`:`الملف ${b.number} · ${esc(s.name)} · رقم ${pad(d.doc_no)}`}</p>`:""}
+  <div class="pages" id="pages"></div>
+  <div class="btns">${isNew?`<button class="btn b-ink" onclick="closeSheet()">وضعتها في الملف ✓</button>`:`${d.deadline?`<button class="btn ${d.done?"b-soft":"b-ink"}" id="doneBtn">${d.done?"لم تُنجز بعد":"تم الرد ✓"}</button>`:""}`}<button class="btn b-soft" id="moveBtn" style="${isNew?"width:auto;padding:0 18px;flex:none":""}">غيّر المكان</button></div>
+  ${isNew?"":`<div class="btns"><button class="btn b-red" id="delBtn">حذف الورقة</button></div>`}`);
+  loadPages(d);
+  $("#moveBtn").onclick=()=>moveSheet(d);
+  if($("#doneBtn"))$("#doneBtn").onclick=async()=>{const r=await sb.from("documents").update({done:!d.done}).eq("id",d.id).select().single();if(!r.error){Object.assign(d,r.data);render();showFiled(d,false);toast(d.done?"تم. أحسنتم 👍":"أُعيدت إلى قائمة الانتباه")}};
+  if($("#delBtn"))$("#delBtn").onclick=()=>confirmDel(d);
+}
+async function loadPages(d){const box=$("#pages");if(!box||!d.image_paths||!d.image_paths.length)return;
+  const {data}=await sb.storage.from("scans").createSignedUrls(d.image_paths,3600);
+  if(box.isConnected)box.innerHTML=(data||[]).map(x=>`<a href="${x.signedUrl}" target="_blank" rel="noopener"><img src="${x.signedUrl}" alt="صفحة من الرسالة"></a>`).join("")}
+function moveSheet(d){
+  openSheet(`<h1 style="font-size:22px">اختر المكان الصحيح</h1><p class="sub" style="margin-top:4px">ستأخذ الورقة رقماً جديداً في القسم الذي تختاره.</p>
+  ${binders.map(b=>`<h2 style="color:${b.color}">${b.number} · ${esc(b.name)}</h2><div class="picks">${sections.filter(s=>s.binder_id===b.id).map(s=>`<button class="card pick" data-mv="${s.id}"><span class="sw" style="background:${b.color}"></span><span class="grow"><span>${esc(s.name)}</span></span>${s.id===d.section_id?'<span class="pill p-mute">الحالي</span>':""}</button>`).join("")}</div>`).join("")}`);
+  $("#sheet").querySelectorAll("[data-mv]").forEach(x=>x.onclick=async()=>{const s=sectionOf(x.dataset.mv);if(s.id===d.section_id)return showFiled(d,false);
+    const no=(await sb.rpc("next_doc_no",{p_section:s.id})).data;const r=await sb.from("documents").update({section_id:s.id,binder_id:s.binder_id,doc_no:no}).eq("id",d.id).select().single();
+    if(r.error)return toast("لم ينجح النقل");Object.assign(d,r.data);render();showFiled(d,true)})}
+function confirmDel(d){openSheet(`<h1 style="font-size:22px">حذف هذه الورقة من Ordo؟</h1><p class="sub" style="margin-top:8px;line-height:1.6">تُحذف الصور والمعلومات نهائياً. الورقة الأصلية في الملف لا تتأثر.</p><div class="btns"><button class="btn b-soft" id="no">رجوع</button><button class="btn b-red" id="yes">حذف نهائياً</button></div>`);
+  $("#no").onclick=()=>showFiled(d,false);
+  $("#yes").onclick=async()=>{if(d.image_paths&&d.image_paths.length)await sb.storage.from("scans").remove(d.image_paths);const r=await sb.from("documents").delete().eq("id",d.id);if(r.error)return toast("لم ينجح الحذف");docs=docs.filter(x=>x.id!==d.id);closeSheet();render();toast("حُذفت")}}
+
+// ===== Clicks =====
+document.addEventListener("click",e=>{
+  const dEl=e.target.closest("[data-doc]");if(dEl){const d=docs.find(x=>x.id===dEl.dataset.doc);if(d)showFiled(d,false);return}
+  const bEl=e.target.closest("[data-binder]");if(bEl){openBinder=bEl.dataset.binder;openSection=null;view="binder";render();scrollTo(0,0);return}
+  const sEl=e.target.closest("[data-sec]");if(sEl){openSection=sEl.dataset.sec;render();return}
+  const gEl=e.target.closest("[data-go]");if(gEl){view=gEl.dataset.go;render();return}
+  const nEl=e.target.closest("#nav button");if(nEl){view=nEl.dataset.v;render();scrollTo(0,0);return}
+  if(e.target.closest("#logout")){sb.auth.signOut().then(()=>{me=null;member=null;render()})}
+});
+
+// ===== Start =====
+async function start(){
+  const {data:{session}}=await sb.auth.getSession();me=session?session.user:null;
+  if(me){try{await loadAll()}catch(e){}}
+  render();
+}
+sb.auth.onAuthStateChange((ev,s)=>{if(ev==="SIGNED_IN"&&!me)start();if(ev==="SIGNED_OUT"){me=null;render()}});
+start();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
