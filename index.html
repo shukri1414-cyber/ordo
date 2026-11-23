@@ -604,7 +604,7 @@ async function analyzeAndFile(imgs){
   try{const d=await fileDoc(res,imgs);showFiled(d,true)}catch(err){failSheet(t("saveFail"),String(err.message||err))}
 }
 // ===== Scanner: edge detection, perspective flattening, scanner look =====
-const SC={pages:[],src:null,q:null,mode:"scan",out:null,step:"edit"};
+const SC={pages:[],src:null,q:null,mode:"color",out:null,step:"edit"};
 function scnLoad(file){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,2400/Math.max(i.naturalWidth,i.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(i.naturalWidth*k);c.height=Math.round(i.naturalHeight*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};i.onerror=bad;i.src=u})}
 
 function detectQuadBright(src){
@@ -633,7 +633,8 @@ function detectQuad(src,strict,maxSide){
   for(let i=0;i<n;i++)g[i]=d[i*4]*.299+d[i*4+1]*.587+d[i*4+2]*.114;
   const blur=a=>{const o=new Float32Array(n),t=new Float32Array(n);for(let y=0;y<h;y++)for(let X=0;X<w;X++){let s=0,m=0;for(let j=-2;j<=2;j++){const xx=X+j;if(xx>=0&&xx<w){s+=a[y*w+xx];m++}}t[y*w+X]=s/m}
     for(let y=0;y<h;y++)for(let X=0;X<w;X++){let s=0,m=0;for(let j=-2;j<=2;j++){const yy=y+j;if(yy>=0&&yy<h){s+=t[yy*w+X];m++}}o[y*w+X]=s/m}return o};
-  const b=blur(g);
+  const b=blur(g);const hfm=new Float32Array(n);for(let i=0;i<n;i++)hfm[i]=Math.abs(g[i]-b[i]);
+  {const hs=new Uint32Array(256);for(let i=0;i<n;i++)hs[Math.min(255,b[i]|0)]++;let sm=0;for(let t=0;t<256;t++)sm+=t*hs[t];let sB=0,wB=0,bv=0;var wt=128;for(let t=0;t<256;t++){wB+=hs[t];if(!wB)continue;const wF=n-wB;if(!wF)break;sB+=t*hs[t];const v=wB*wF*(sB/wB-(sm-sB)/wF)**2;if(v>bv){bv=v;wt=t}}wt=Math.max(wt,90)}
   // 2) gradients
   const mag=new Float32Array(n),ang=new Float32Array(n);let mx=0;
   for(let y=1;y<h-1;y++)for(let X=1;X<w-1;X++){const i=y*w+X;
@@ -649,8 +650,8 @@ function detectQuad(src,strict,maxSide){
   for(let y=0;y<h;y++)for(let X=0;X<w;X++){const i=y*w+X;if(!edge[i])continue;let a=ang[i];if(a<0)a+=Math.PI;const t0=Math.round(a/Math.PI*NT);
     for(let dt=-6;dt<=6;dt++){const t=((t0+dt)%NT+NT)%NT;const r=Math.round(X*cs[t]+y*sn[t])+diag;H[t*NR+r]+=1}}
   const lines=[],minV=Math.min(w,h)*.18;
-  for(let it=0;it<(strict?12:18);it++){let bi=-1,bv=minV;for(let i=0;i<H.length;i++)if(H[i]>bv){bv=H[i];bi=i}if(bi<0)break;
-    const t=(bi/NR)|0,r=bi%NR-diag;lines.push({t,r,v:bv});
+  const bucket=new Uint8Array(18);for(let it=0;it<60&&lines.length<28;it++){let bi=-1,bv=minV;for(let i=0;i<H.length;i++)if(H[i]>bv){bv=H[i];bi=i}if(bi<0)break;
+    const t=(bi/NR)|0,r=bi%NR-diag,bk=Math.floor(t/10);if(bucket[bk]<4){bucket[bk]++;lines.push({t,r,v:bv})}
     for(let dt=-8;dt<=8;dt++)for(let dr=-12;dr<=12;dr++){let tt=t+dt,rr=r+dr;if(tt<0){tt+=NT;rr=-rr}else if(tt>=NT){tt-=NT;rr=-rr}const j=tt*NR+rr+diag;if(rr+diag>=0&&rr+diag<NR)H[j]=0}}
   const hor=lines.filter(l=>l.t>=45&&l.t<135),ver=lines.filter(l=>l.t<45||l.t>=135);
   const inter=(a,b2)=>{const A=[cs[a.t],sn[a.t]],B=[cs[b2.t],sn[b2.t]],det=A[0]*B[1]-A[1]*B[0];if(Math.abs(det)<1e-6)return null;return[(a.r*B[1]-A[1]*b2.r)/det,(A[0]*b2.r-a.r*B[0])/det]};
@@ -666,13 +667,18 @@ function detectQuad(src,strict,maxSide){
     const cx=(P[0][0]+P[1][0]+P[2][0]+P[3][0])/4,cy=(P[0][1]+P[1][1]+P[2][1]+P[3][1])/4;
     P.sort((p,q)=>Math.atan2(p[1]-cy,p[0]-cx)-Math.atan2(q[1]-cy,q[0]-cx));
     const ar=polyArea(P)/(w*h);if(ar<.12||ar>.995)continue;
+    let onB=false;for(let i=0;i<4;i++){const p=P[i],q=P[(i+1)%4],m=.025;if((p[0]<w*m&&q[0]<w*m)||(p[1]<h*m&&q[1]<h*m)||(p[0]>w*(1-m)&&q[0]>w*(1-m))||(p[1]>h*(1-m)&&q[1]>h*(1-m))){onB=true;break}}if(onB)continue;
     let convex=true;for(let i=0;i<4;i++){const p=P[i],q=P[(i+1)%4],r=P[(i+2)%4];if((q[0]-p[0])*(r[1]-q[1])-(q[1]-p[1])*(r[0]-q[0])<=0){convex=false;break}}if(!convex)continue;
     const sup=[0,1,2,3].map(i=>support(P[i],P[(i+1)%4])),mn=Math.min(...sup),avg=sup.reduce((s,y)=>s+y,0)/4;if(mn<.3)continue;
     // brightness: paper inside should be lighter than just outside
     let din=0,dout=0,m=0;for(let i=0;i<4;i++){const p=P[i],q=P[(i+1)%4];for(let s=1;s<10;s++){const X=p[0]+(q[0]-p[0])*s/10,Y=p[1]+(q[1]-p[1])*s/10,vx=cx-X,vy=cy-Y,vl=Math.hypot(vx,vy)||1;
       const li=lum(X+vx/vl*6,Y+vy/vl*6),lo=lum(X-vx/vl*6,Y-vy/vl*6);if(li!=null&&lo!=null){din+=li;dout+=lo;m++}}}
     const contrast=m?Math.max(0,(din-dout)/m)/255:0;
-    const score=(avg*.6+mn*.4)*(0.55+ar)*(0.6+Math.min(contrast*4,1)*.8);
+    let wh=0,wn=0;for(let gy=1;gy<10;gy++)for(let gx=1;gx<10;gx++){const u=gx/10,v=gy/10,ax=P[0][0]+(P[1][0]-P[0][0])*u,ay=P[0][1]+(P[1][1]-P[0][1])*u,bx2=P[3][0]+(P[2][0]-P[3][0])*u,by2=P[3][1]+(P[2][1]-P[3][1])*u,L=lum(ax+(bx2-ax)*v,ay+(by2-ay)*v);if(L!=null){wn++;if(L>=wt)wh++}}
+    const white=wn?wh/wn:0;if(white<.55)continue;
+    let hin=0,hn=0;for(let i=0;i<4;i++){const p=P[i],q=P[(i+1)%4];for(let s2=1;s2<12;s2++){const X=p[0]+(q[0]-p[0])*s2/12,Y=p[1]+(q[1]-p[1])*s2/12,vx=cx-X,vy=cy-Y,vl=Math.hypot(vx,vy)||1;for(const dd2 of [5,9]){const xi=Math.round(X+vx/vl*dd2),yi=Math.round(Y+vy/vl*dd2);if(xi>=0&&yi>=0&&xi<w&&yi<h){hin+=hfm[yi*w+xi];hn++}}}}hin=hn?hin/hn:0;const texF=Math.exp(-Math.max(0,hin-1.5)/3);
+    const sa=i=>{const p=P[i],q=P[(i+1)%4];return Math.atan2(q[1]-p[1],q[0]-p[0])},adf=(x,y)=>{let d=Math.abs(x-y)%Math.PI;return Math.min(d,Math.PI-d)*180/Math.PI},par=Math.max(adf(sa(0),sa(2)),adf(sa(1),sa(3)));if(par>22)continue;const parF=Math.exp(-Math.pow(par/10,2));
+    const score=(avg*.6+mn*.4)*(0.55+ar)*(0.6+Math.min(contrast*4,1)*.8)*Math.pow(white,8)*parF*texF;
     if(score>bs){bs=score;best=P}}
   if(best){// order TL,TR,BR,BL
     const s=best.map(p=>p[0]+p[1]),df=best.map(p=>p[0]-p[1]);const tl=best[s.indexOf(Math.min(...s))],br=best[s.indexOf(Math.max(...s))],tr=best[df.indexOf(Math.max(...df))],bl=best[df.indexOf(Math.min(...df))];
@@ -712,17 +718,20 @@ function enhance(cv,mode){
   const w=cv.width,h=cv.height,out=document.createElement("canvas");out.width=w;out.height=h;const ox=out.getContext("2d");ox.drawImage(cv,0,0);
   if(mode==="orig")return out;
   const id=ox.getImageData(0,0,w,h),dd=id.data;
-  const sw=Math.max(4,Math.round(w/24)),sh=Math.max(4,Math.round(h/24)),s=document.createElement("canvas");s.width=sw;s.height=sh;const sx=s.getContext("2d",{willReadFrequently:true});sx.imageSmoothingQuality="high";sx.drawImage(cv,0,0,sw,sh);
+  const sw=Math.max(4,Math.round(w/32)),sh=Math.max(4,Math.round(h/32)),s=document.createElement("canvas");s.width=sw;s.height=sh;const sx=s.getContext("2d",{willReadFrequently:true});sx.imageSmoothingQuality="high";sx.drawImage(cv,0,0,sw,sh);
   const sdI=sx.getImageData(0,0,sw,sh);
-  for(let pass=0;pass<3;pass++){const S=new Uint8ClampedArray(sdI.data),D=sdI.data;for(let y=0;y<sh;y++)for(let x=0;x<sw;x++){let bi=(y*sw+x)*4,bl=-1;
+  for(let pass=0;pass<5;pass++){const S=new Uint8ClampedArray(sdI.data),D=sdI.data;for(let y=0;y<sh;y++)for(let x=0;x<sw;x++){let bi=(y*sw+x)*4,bl=-1;
     for(let yy=Math.max(0,y-1);yy<=Math.min(sh-1,y+1);yy++)for(let xx=Math.max(0,x-1);xx<=Math.min(sw-1,x+1);xx++){const p=(yy*sw+xx)*4,l=S[p]+S[p+1]+S[p+2];if(l>bl){bl=l;bi=p}}
     const t=(y*sw+x)*4;D[t]=S[bi];D[t+1]=S[bi+1];D[t+2]=S[bi+2]}}
   sx.putImageData(sdI,0,0);
   const b=document.createElement("canvas");b.width=w;b.height=h;const bx=b.getContext("2d",{willReadFrequently:true});bx.imageSmoothingQuality="high";bx.drawImage(s,0,0,w,h);const bd=bx.getImageData(0,0,w,h).data;
   for(let i=0;i<dd.length;i+=4){
-    if(mode==="scan"){const L=(dd[i]*.3+dd[i+1]*.59+dd[i+2]*.11)/Math.max(24,bd[i]*.3+bd[i+1]*.59+bd[i+2]*.11);let t=(L-.42)/.46;t=t<0?0:t>1?1:t;const y=255*Math.pow(t,1.35);dd[i]=dd[i+1]=dd[i+2]=y}
-    else{let r=dd[i]/Math.max(24,bd[i]),g=dd[i+1]/Math.max(24,bd[i+1]),bb=dd[i+2]/Math.max(24,bd[i+2]);const m=(r+g+bb)/3;r=m+(r-m)*1.25;g=m+(g-m)*1.25;bb=m+(bb-m)*1.25;
-      const f=x=>{let t=(x-.18)/.74;t=t<0?0:t>1?1:t;return 255*Math.pow(t,1.15)};dd[i]=f(r);dd[i+1]=f(g);dd[i+2]=f(bb)}}
+    if(mode==="scan"){const L=(dd[i]*.3+dd[i+1]*.59+dd[i+2]*.11)/Math.max(24,bd[i]*.3+bd[i+1]*.59+bd[i+2]*.11);let t=(L-.3)/.6;t=t<0?0:t>1?1:t;const y=255*Math.pow(t,1.6);dd[i]=dd[i+1]=dd[i+2]=y}
+    else{let r=dd[i]/Math.max(30,bd[i]),g=dd[i+1]/Math.max(30,bd[i+1]),bb=dd[i+2]/Math.max(30,bd[i+2]);const m=(r+g+bb)/3;r=m+(r-m)*1.18;g=m+(g-m)*1.18;bb=m+(bb-m)*1.18;
+      const f=x=>{let t=(x-.06)/.86;t=t<0?0:t>1?1:t;return 255*Math.pow(t,1.3)};dd[i]=f(r);dd[i+1]=f(g);dd[i+2]=f(bb)}}
+  // gentle sharpening (unsharp mask)
+  const src2=new Uint8ClampedArray(dd),W4=w*4;
+  for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){const i=(y*w+x)*4;for(let c=0;c<3;c++){const j=i+c,bl=(src2[j-4]+src2[j+4]+src2[j-W4]+src2[j+W4]+src2[j])/5;dd[j]=src2[j]+(src2[j]-bl)*.7}}
   ox.putImageData(id,0,0);return out}
 
 // ----- UI -----
@@ -823,7 +832,7 @@ document.addEventListener("click",e=>{
 
 // ===== Start =====
 // ===== Live document camera (auto-capture, like Notes) =====
-const LV={stream:null,on:false,auto:true,stable:0,last:null,lock:false,capQ:null,miss:0,pages:[],busy:false,small:null,mode:(()=>{try{return localStorage.getItem("ordo_scanmode")||"scan"}catch(e){return"scan"}})()};
+const LV={stream:null,on:false,auto:true,stable:0,last:null,lock:false,capQ:null,miss:0,pages:[],busy:false,small:null,mode:(()=>{try{return localStorage.getItem("ordo_scanmode2")||"color"}catch(e){return"color"}})()};
 function lvHint(k){const e=$("#lvHint");if(e.dataset.k!==k){e.dataset.k=k;e.textContent=t(k)}}
 function lvBar(){const n=LV.pages.length;$("#lvDone").disabled=!n;$("#lvDone").textContent=t("save")+(n?` (${n})`:"");
   const th=$("#lvThumb");if(n){th.innerHTML=`<img src="${LV.pages[n-1].thumb}" alt=""><b>${n}</b>`}else th.innerHTML=`<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M21 17l-5-5-8 7"/></svg><span>${t("lvPhotos")}</span>`;
@@ -832,7 +841,7 @@ async function liveOpen(){
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$("#file").value="";$("#file").click();return}
   LV.pages=[];LV.stable=0;LV.last=null;LV.lock=false;LV.miss=0;
   $("#live").hidden=false;document.body.style.overflow="hidden";lvBar();lvHint("lvFind");
-  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:3840},height:{ideal:2160}}})}
+  try{LV.stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:"environment"},width:{ideal:4032},height:{ideal:3024},aspectRatio:{ideal:4/3}}})}
   catch(e){liveClose();$("#file").value="";$("#file").click();return}
   const v=$("#lv");v.srcObject=LV.stream;try{await v.play()}catch(e){}
   LV.on=true;lvLoop()}
@@ -848,10 +857,10 @@ function lvDraw(q,f){const o=$("#lo"),dpr=window.devicePixelRatio||1;if(o.width!
 function lvDisp(a,b){if(!a||!b)return 1;let m=0;for(let i=0;i<4;i++)m=Math.max(m,Math.hypot(a[i][0]-b[i][0],a[i][1]-b[i][1]));return m/Math.hypot(LV.small.width,LV.small.height)}
 function lvLoop(){if(!LV.on)return;const v=$("#lv");
   if(v.readyState<2||!v.videoWidth||LV.busy){setTimeout(lvLoop,120);return}
-  const k=320/Math.max(v.videoWidth,v.videoHeight),sw=Math.round(v.videoWidth*k),sh=Math.round(v.videoHeight*k);
+  const k=420/Math.max(v.videoWidth,v.videoHeight),sw=Math.round(v.videoWidth*k),sh=Math.round(v.videoHeight*k);
   if(!LV.small||LV.small.width!==sw){LV.small=document.createElement("canvas");LV.small.width=sw;LV.small.height=sh}
   LV.small.getContext("2d",{willReadFrequently:true}).drawImage(v,0,0,sw,sh);
-  let q=null;try{q=detectQuad(LV.small,true,320)}catch(e){}
+  let q=null;try{q=detectQuad(LV.small,true,420)}catch(e){}
   if(q){const ar=polyArea(q)/(sw*sh);if(ar<.12)q=null}
   if(q){LV.miss=0;const d=lvDisp(q,LV.last);LV.stable=d<.022?LV.stable+1:0;LV.last=q;
     if(LV.lock&&lvDisp(q,LV.capQ)>.12)LV.lock=false;
@@ -866,6 +875,7 @@ async function lvCapture(q){if(LV.busy)return;LV.busy=true;
   const f=$("#lvFlash");f.classList.remove("on");void f.offsetWidth;f.classList.add("on");try{navigator.vibrate&&navigator.vibrate(30)}catch(e){}
   await new Promise(r=>setTimeout(r,30));
   const sc=full.width/LV.small.width,Q=q?q.map(p=>[p[0]*sc,p[1]*sc]):[[0,0],[full.width,0],[full.width,full.height],[0,full.height]];
+  if(q){let q2=null;try{q2=detectQuad(full,true,720)}catch(e){}if(q2){let m=0;for(let i=0;i<4;i++)m=Math.max(m,Math.hypot(q2[i][0]-Q[i][0],q2[i][1]-Q[i][1]));if(m<Math.hypot(full.width,full.height)*.06)for(let i=0;i<4;i++)Q[i]=q2[i]}}
   const out=enhance(warp(full,Q),LV.mode);const img=await scnBlob(out);
   const tc=document.createElement("canvas"),tk=120/Math.max(out.width,out.height);tc.width=Math.round(out.width*tk);tc.height=Math.round(out.height*tk);tc.getContext("2d").drawImage(out,0,0,tc.width,tc.height);img.thumb=tc.toDataURL("image/jpeg",.7);
   LV.pages.push(img);LV.lock=true;LV.capQ=q;LV.stable=0;lvBar();lvHint("lvGot");
@@ -876,7 +886,7 @@ $("#lvX").onclick=liveClose;
 $("#lvDone").onclick=lvDone;
 $("#lvShot").onclick=()=>lvCapture(LV.last);
 $("#lvAuto").onclick=()=>{LV.auto=!LV.auto;LV.stable=0;lvBar()};
-$("#lvMode").onclick=()=>{LV.mode=LV.mode==="scan"?"color":"scan";try{localStorage.setItem("ordo_scanmode",LV.mode)}catch(e){}lvBar()};
+$("#lvMode").onclick=()=>{LV.mode=LV.mode==="scan"?"color":"scan";try{localStorage.setItem("ordo_scanmode2",LV.mode)}catch(e){}lvBar()};
 $("#lvThumb").onclick=()=>{if(LV.pages.length)return;liveClose();$("#file2").value="";$("#file2").click()};
 $("#file2").onchange=e=>{const f=e.target.files[0];if(f){SC.pages=[];scnTake(f)}};
 
