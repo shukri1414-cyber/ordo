@@ -756,7 +756,7 @@ function enhance(cv,mode){
    const S2=s2x.getImageData(0,0,s2w,s2h);for(let pass=0;pass<2;pass++){const A=new Uint8ClampedArray(S2.data),D=S2.data;for(let y=0;y<s2h;y++)for(let x=0;x<s2w;x++){let bl=-1,bi=0;for(let yy=Math.max(0,y-1);yy<=Math.min(s2h-1,y+1);yy++)for(let xx=Math.max(0,x-1);xx<=Math.min(s2w-1,x+1);xx++){const p=(yy*s2w+xx)*4,l=A[p]+A[p+1]+A[p+2];if(l>bl){bl=l;bi=p}}const q=(y*s2w+x)*4;D[q]=A[bi];D[q+1]=A[bi+1];D[q+2]=A[bi+2]}}
    s2x.putImageData(S2,0,0);const u2=document.createElement("canvas");u2.width=w;u2.height=h;const ux=u2.getContext("2d",{willReadFrequently:true});ux.imageSmoothingQuality="high";ux.drawImage(s2,0,0,w,h);const B2=ux.getImageData(0,0,w,h).data;
    for(let i=0;i<dd.length;i+=4){const r=dd[i],g=dd[i+1],bb=dd[i+2],mx=Math.max(r,g,bb),mn=Math.min(r,g,bb);if(mx-mn>34)continue;
-     const L=r*.3+g*.59+bb*.11;if(L<120)continue;const BL=Math.max(L,B2[i]*.3+B2[i+1]*.59+B2[i+2]*.11,120);const lift=Math.min(255,L/BL*262),wgt=Math.min(1,(L-120)/50),m=L+(lift-L)*wgt;dd[i]=dd[i+1]=dd[i+2]=m}}
+     const L=r*.3+g*.59+bb*.11;if(L<120)continue;const BL=Math.max(L,B2[i]*.3+B2[i+1]*.59+B2[i+2]*.11,120);const v=L/BL;const lift=v>.84?255:Math.min(255,v*262),wgt=Math.min(1,(L-120)/50),m=L+(lift-L)*wgt;dd[i]=dd[i+1]=dd[i+2]=m}}
   // gentle sharpening (unsharp mask)
   const shp=Math.max(w,h)>=1800?.45:.2;const src2=new Uint8ClampedArray(dd),W4=w*4;
   for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){const i=(y*w+x)*4;for(let c=0;c<3;c++){const j=i+c,bl=(src2[j-4]+src2[j+4]+src2[j-W4]+src2[j+W4]+src2[j])/5;dd[j]=src2[j]+(src2[j]-bl)*shp}}
