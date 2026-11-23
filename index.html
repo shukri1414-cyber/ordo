@@ -579,7 +579,7 @@ async function analyzeAndFile(imgs){
 const SC={pages:[],src:null,q:null,mode:"scan",out:null,step:"edit"};
 function scnLoad(file){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,2400/Math.max(i.naturalWidth,i.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(i.naturalWidth*k);c.height=Math.round(i.naturalHeight*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};i.onerror=bad;i.src=u})}
 
-function detectQuad(src){
+function detectQuadBright(src){
   const k=Math.min(1,320/Math.max(src.width,src.height)),w=Math.max(8,Math.round(src.width*k)),h=Math.max(8,Math.round(src.height*k));
   const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0,w,h);
   const d=x.getImageData(0,0,w,h).data,n=w*h,v=new Uint8Array(n),hist=new Uint32Array(256);
@@ -597,6 +597,60 @@ function detectQuad(src){
   if(!bestPts)return def;
   const q=bestPts.map(p=>[(p[0]+.5)/k,(p[1]+.5)/k]);const ar=polyArea(q)/(src.width*src.height);
   return ar>.15&&ar<.985?q:def}
+function detectQuad(src){
+  // 1) small grayscale copy
+  const k=Math.min(1,420/Math.max(src.width,src.height)),w=Math.max(16,Math.round(src.width*k)),h=Math.max(16,Math.round(src.height*k));
+  const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0,w,h);
+  const d=x.getImageData(0,0,w,h).data,n=w*h,g=new Float32Array(n);
+  for(let i=0;i<n;i++)g[i]=d[i*4]*.299+d[i*4+1]*.587+d[i*4+2]*.114;
+  const blur=a=>{const o=new Float32Array(n),t=new Float32Array(n);for(let y=0;y<h;y++)for(let X=0;X<w;X++){let s=0,m=0;for(let j=-2;j<=2;j++){const xx=X+j;if(xx>=0&&xx<w){s+=a[y*w+xx];m++}}t[y*w+X]=s/m}
+    for(let y=0;y<h;y++)for(let X=0;X<w;X++){let s=0,m=0;for(let j=-2;j<=2;j++){const yy=y+j;if(yy>=0&&yy<h){s+=t[yy*w+X];m++}}o[y*w+X]=s/m}return o};
+  const b=blur(g);
+  // 2) gradients
+  const mag=new Float32Array(n),ang=new Float32Array(n);let mx=0;
+  for(let y=1;y<h-1;y++)for(let X=1;X<w-1;X++){const i=y*w+X;
+    const gx=(b[i-w+1]+2*b[i+1]+b[i+w+1])-(b[i-w-1]+2*b[i-1]+b[i+w-1]),gy=(b[i+w-1]+2*b[i+w]+b[i+w+1])-(b[i-w-1]+2*b[i-w]+b[i-w+1]);
+    mag[i]=Math.hypot(gx,gy);ang[i]=Math.atan2(gy,gx);if(mag[i]>mx)mx=mag[i]}
+  const hist=new Uint32Array(256);for(let i=0;i<n;i++)hist[Math.min(255,(mag[i]/mx*255)|0)]++;
+  let acc=0,th=0;for(let t=255;t>=0;t--){acc+=hist[t];if(acc>n*.09){th=t/255*mx;break}}
+  const edge=new Uint8Array(n);for(let i=0;i<n;i++)if(mag[i]>=th&&mag[i]>8)edge[i]=1;
+  // 3) Hough transform, voting only near each pixel's gradient direction
+  const NT=180,diag=Math.ceil(Math.hypot(w,h)),NR=2*diag+1,H=new Float32Array(NT*NR),cs=new Float32Array(NT),sn=new Float32Array(NT);
+  for(let t=0;t<NT;t++){cs[t]=Math.cos(t*Math.PI/NT);sn[t]=Math.sin(t*Math.PI/NT)}
+  for(let y=0;y<h;y++)for(let X=0;X<w;X++){const i=y*w+X;if(!edge[i])continue;let a=ang[i];if(a<0)a+=Math.PI;const t0=Math.round(a/Math.PI*NT);
+    for(let dt=-6;dt<=6;dt++){const t=((t0+dt)%NT+NT)%NT;const r=Math.round(X*cs[t]+y*sn[t])+diag;H[t*NR+r]+=1}}
+  const lines=[],minV=Math.min(w,h)*.18;
+  for(let it=0;it<18;it++){let bi=-1,bv=minV;for(let i=0;i<H.length;i++)if(H[i]>bv){bv=H[i];bi=i}if(bi<0)break;
+    const t=(bi/NR)|0,r=bi%NR-diag;lines.push({t,r,v:bv});
+    for(let dt=-8;dt<=8;dt++)for(let dr=-12;dr<=12;dr++){let tt=t+dt,rr=r+dr;if(tt<0){tt+=NT;rr=-rr}else if(tt>=NT){tt-=NT;rr=-rr}const j=tt*NR+rr+diag;if(rr+diag>=0&&rr+diag<NR)H[j]=0}}
+  const hor=lines.filter(l=>l.t>=45&&l.t<135),ver=lines.filter(l=>l.t<45||l.t>=135);
+  const inter=(a,b2)=>{const A=[cs[a.t],sn[a.t]],B=[cs[b2.t],sn[b2.t]],det=A[0]*B[1]-A[1]*B[0];if(Math.abs(det)<1e-6)return null;return[(a.r*B[1]-A[1]*b2.r)/det,(A[0]*b2.r-a.r*B[0])/det]};
+  const support=(p,q)=>{const L=Math.hypot(q[0]-p[0],q[1]-p[1]),N=Math.max(8,L|0);let hit=0,cnt=0;
+    for(let s=0;s<=N;s++){const X=p[0]+(q[0]-p[0])*s/N,Y=p[1]+(q[1]-p[1])*s/N;const xi=Math.round(X),yi=Math.round(Y);if(xi<1||yi<1||xi>=w-1||yi>=h-1)continue;cnt++;
+      let ok=0;for(let oy=-2;oy<=2&&!ok;oy++)for(let ox=-2;ox<=2;ox++){const j=(yi+oy)*w+xi+ox;if(j>=0&&j<n&&edge[j]){ok=1;break}}hit+=ok}
+    return cnt<N*.5?0:hit/cnt};
+  const lum=(X,Y)=>{const xi=Math.round(X),yi=Math.round(Y);return xi<0||yi<0||xi>=w||yi>=h?null:b[yi*w+xi]};
+  let best=null,bs=0;
+  for(let a=0;a<hor.length;a++)for(let a2=a+1;a2<hor.length;a2++)for(let v=0;v<ver.length;v++)for(let v2=v+1;v2<ver.length;v2++){
+    const P=[inter(hor[a],ver[v]),inter(hor[a],ver[v2]),inter(hor[a2],ver[v2]),inter(hor[a2],ver[v])];if(P.some(p=>!p))continue;
+    if(P.some(p=>p[0]<-w*.03||p[1]<-h*.03||p[0]>w*1.03||p[1]>h*1.03))continue;
+    const cx=(P[0][0]+P[1][0]+P[2][0]+P[3][0])/4,cy=(P[0][1]+P[1][1]+P[2][1]+P[3][1])/4;
+    P.sort((p,q)=>Math.atan2(p[1]-cy,p[0]-cx)-Math.atan2(q[1]-cy,q[0]-cx));
+    const ar=polyArea(P)/(w*h);if(ar<.12||ar>.995)continue;
+    let convex=true;for(let i=0;i<4;i++){const p=P[i],q=P[(i+1)%4],r=P[(i+2)%4];if((q[0]-p[0])*(r[1]-q[1])-(q[1]-p[1])*(r[0]-q[0])<=0){convex=false;break}}if(!convex)continue;
+    const sup=[0,1,2,3].map(i=>support(P[i],P[(i+1)%4])),mn=Math.min(...sup),avg=sup.reduce((s,y)=>s+y,0)/4;if(mn<.3)continue;
+    // brightness: paper inside should be lighter than just outside
+    let din=0,dout=0,m=0;for(let i=0;i<4;i++){const p=P[i],q=P[(i+1)%4];for(let s=1;s<10;s++){const X=p[0]+(q[0]-p[0])*s/10,Y=p[1]+(q[1]-p[1])*s/10,vx=cx-X,vy=cy-Y,vl=Math.hypot(vx,vy)||1;
+      const li=lum(X+vx/vl*6,Y+vy/vl*6),lo=lum(X-vx/vl*6,Y-vy/vl*6);if(li!=null&&lo!=null){din+=li;dout+=lo;m++}}}
+    const contrast=m?Math.max(0,(din-dout)/m)/255:0;
+    const score=(avg*.6+mn*.4)*(0.55+ar)*(0.6+Math.min(contrast*4,1)*.8);
+    if(score>bs){bs=score;best=P}}
+  if(best){// order TL,TR,BR,BL
+    const s=best.map(p=>p[0]+p[1]),df=best.map(p=>p[0]-p[1]);const tl=best[s.indexOf(Math.min(...s))],br=best[s.indexOf(Math.max(...s))],tr=best[df.indexOf(Math.max(...df))],bl=best[df.indexOf(Math.min(...df))];
+    const q=[tl,tr,br,bl].map(p=>[Math.max(0,Math.min(src.width,(p[0]+.5)/k)),Math.max(0,Math.min(src.height,(p[1]+.5)/k))]);
+    const mx2=(q[0][0]+q[1][0]+q[2][0]+q[3][0])/4,my2=(q[0][1]+q[1][1]+q[2][1]+q[3][1])/4;q.forEach(p=>{p[0]+=(mx2-p[0])*.008;p[1]+=(my2-p[1])*.008});
+    if(new Set(q.map(p=>p.join())).size===4)return q}
+  return detectQuadBright(src)}
 function polyArea(q){let a=0;for(let i=0;i<4;i++){const[p,r]=[q[i],q[(i+1)%4]];a+=p[0]*r[1]-r[0]*p[1]}return Math.abs(a)/2}
 const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
 
