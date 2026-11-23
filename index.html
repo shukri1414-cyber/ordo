@@ -122,6 +122,32 @@ nav button.on{color:var(--ink);font-weight:600}
 .hello .field input:focus{border-color:#fff}
 .hshelf{position:relative;height:300px;margin-top:24px}
 .hshelf div{position:absolute;bottom:14px;width:52px;border-radius:9px 9px 4px 4px;display:flex;justify-content:center;padding-top:12px;font-weight:700;font-size:22px}
+.scn{position:fixed;inset:0;z-index:60;background:#0F1218;color:#fff;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.scn[hidden]{display:none}
+.scn-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px 6px}
+.scn-top button{color:#fff;opacity:.8;font-size:15px;padding:8px 4px}
+#scnT{font-weight:600;font-size:15px;text-align:center;flex:1}
+#scnN{font-size:13px;color:#F2A44B;min-width:56px;text-align:left}
+.scn-stage{flex:1;display:grid;place-items:center;position:relative;overflow:hidden;touch-action:none}
+.scn-box{position:relative}
+.scn-box canvas#scnC{display:block;border-radius:4px}
+.scn-box svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;touch-action:none}
+.hd{cursor:grab}
+.loupe{position:absolute;width:100px;height:100px;border-radius:50%;box-shadow:0 0 0 3px #fff,0 8px 24px rgba(0,0,0,.5);display:none;pointer-events:none}
+.scn-busy{text-align:center;color:#fff}.scn-busy p{margin-top:12px;font-weight:500;opacity:.85}
+.scn-paper{position:relative;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.5);border-radius:3px;overflow:hidden}
+.scn-paper canvas{display:block}
+.scn-paper.sweep::after{content:"";position:absolute;left:0;right:0;height:90px;top:-90px;background:linear-gradient(180deg,rgba(242,164,75,0),rgba(242,164,75,.35) 80%,#F2A44B);animation:sweep 1.1s cubic-bezier(.5,0,.3,1) forwards}
+@keyframes sweep{to{top:100%}}
+@media (prefers-reduced-motion:reduce){.scn-paper.sweep::after{display:none}}
+.scn-bar{padding:10px 18px 16px;display:flex;flex-direction:column;gap:12px}
+.scn-modes{display:flex;justify-content:center;gap:6px;background:rgba(255,255,255,.08);border-radius:14px;padding:4px;align-self:center}
+.scn-modes button{color:#fff;padding:8px 18px;border-radius:10px;font-size:14px;font-weight:500;opacity:.75}
+.scn-modes button.on{background:#fff;color:#14171F;opacity:1}
+.scn-row{display:flex;gap:10px}
+.scn-b{flex:1;height:54px;border-radius:16px;font-weight:600;font-size:16px}
+.scn-b.ghost{background:rgba(255,255,255,.1);color:#fff}
+.scn-b.main{background:#F2A44B;color:#14171F;flex:1.4}
 </style>
 </head>
 <body>
@@ -135,7 +161,8 @@ nav button.on{color:var(--ink);font-weight:600}
 <button data-v="more"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>العائلة</button>
 </nav>
 </div></div>
-<input type="file" id="file" accept="image/*" capture="environment" multiple hidden>
+<input type="file" id="file" accept="image/*" capture="environment" hidden>
+<div class="scn" id="scn" hidden><div class="scn-top"><button id="scnX">إلغاء</button><span id="scnT"></span><span id="scnN"></span></div><div class="scn-stage" id="scnStage"></div><div class="scn-bar" id="scnBar"></div></div>
 <div class="ov" id="ov"><div class="sheet" id="sheet"></div></div>
 <div class="toast" id="toast"></div>
 <script>
@@ -267,11 +294,11 @@ function placeCard(b,s,no){
   <div class="paper"><div style="display:flex;justify-content:space-between;align-items:center"><i style="width:46%;background:${b.color}"></i><span class="hl">${pad(no)}</span></div><i></i><i style="width:80%"></i><i style="width:60%"></i></div></div></div></div>`}
 
 // ----- Scan → analyse → file -----
-$("#scanBtn").onclick=()=>{$("#file").value="";$("#file").click()};
-$("#file").onchange=async e=>{
-  const files=[...e.target.files].slice(0,4);if(!files.length)return;
+$("#scanBtn").onclick=()=>{SC.pages=[];$("#file").value="";$("#file").click()};
+$("#file").onchange=e=>{const f=e.target.files[0];if(f)scnTake(f)};
+$("#scnX").onclick=scnClose;
+async function analyzeAndFile(imgs){
   openSheet(`<div class="spin"></div><p style="text-align:center;font-weight:600;font-size:17px" id="stage">أقرأ الرسالة…</p><p class="sub" style="text-align:center;margin-top:6px">Claude يقرأها ويقرّر مكانها</p>`);
-  let imgs;try{imgs=await Promise.all(files.map(f=>shrink(f,1600,.82)))}catch(err){return failSheet("لم أستطع فتح الصورة.")}
   const {data:{session}}=await sb.auth.getSession();
   let res;try{
     const r=await fetch(SUPABASE_URL+"/functions/v1/analyze",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY},body:JSON.stringify({images:imgs.map(x=>x.b64),lang:"ar"})});
@@ -279,7 +306,120 @@ $("#file").onchange=async e=>{
   }catch(err){return failSheet("لم تنجح القراءة. تأكد من الإنترنت وجرّب مرة أخرى.",String(err.message||err))}
   $("#stage").textContent="أحفظ الورقة في مكانها…";
   try{const d=await fileDoc(res,imgs);showFiled(d,true)}catch(err){failSheet("لم أستطع الحفظ.",String(err.message||err))}
-};
+}
+// ===== Scanner: edge detection, perspective flattening, scanner look =====
+const SC={pages:[],src:null,q:null,mode:"scan",out:null,step:"edit"};
+function scnLoad(file){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,2400/Math.max(i.naturalWidth,i.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(i.naturalWidth*k);c.height=Math.round(i.naturalHeight*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};i.onerror=bad;i.src=u})}
+
+function detectQuad(src){
+  const k=Math.min(1,320/Math.max(src.width,src.height)),w=Math.max(8,Math.round(src.width*k)),h=Math.max(8,Math.round(src.height*k));
+  const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d",{willReadFrequently:true});x.drawImage(src,0,0,w,h);
+  const d=x.getImageData(0,0,w,h).data,n=w*h,v=new Uint8Array(n),hist=new Uint32Array(256);
+  for(let i=0;i<n;i++){const r=d[i*4],g=d[i*4+1],b=d[i*4+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b);const t=Math.max(0,Math.min(255,((r+g+b)/3-(mx-mn)*.8)|0));v[i]=t;hist[t]++}
+  let sum=0;for(let t=0;t<256;t++)sum+=t*hist[t];let sB=0,wB=0,best=0,th=128;
+  for(let t=0;t<256;t++){wB+=hist[t];if(!wB)continue;const wF=n-wB;if(!wF)break;sB+=t*hist[t];const mB=sB/wB,mF=(sum-sB)/wF,bt=wB*wF*(mB-mF)*(mB-mF);if(bt>best){best=bt;th=t}}
+  const lab=new Int32Array(n).fill(-1),st=new Int32Array(n);let bestId=-1,bestA=0,bestPts=null;
+  for(let i=0;i<n;i++){if(v[i]<=th||lab[i]>=0)continue;let sp=0,a=0;st[sp++]=i;lab[i]=i;let tl=[0,0,1e9],br=[0,0,-1e9],tr=[0,0,-1e9],bl=[0,0,1e9];
+    while(sp){const p=st[--sp];a++;const px=p%w,py=(p/w)|0,s=px+py,df=px-py;
+      if(s<tl[2])tl=[px,py,s];if(s>br[2])br=[px,py,s];if(df>tr[2])tr=[px,py,df];if(df<bl[2])bl=[px,py,df];
+      if(px>0&&v[p-1]>th&&lab[p-1]<0){lab[p-1]=i;st[sp++]=p-1}if(px<w-1&&v[p+1]>th&&lab[p+1]<0){lab[p+1]=i;st[sp++]=p+1}
+      if(py>0&&v[p-w]>th&&lab[p-w]<0){lab[p-w]=i;st[sp++]=p-w}if(py<h-1&&v[p+w]>th&&lab[p+w]<0){lab[p+w]=i;st[sp++]=p+w}}
+    if(a>bestA){bestA=a;bestId=i;bestPts=[tl,tr,br,bl]}}
+  const def=[[.06,.06],[.94,.06],[.94,.94],[.06,.94]].map(([a,b])=>[a*src.width,b*src.height]);
+  if(!bestPts)return def;
+  const q=bestPts.map(p=>[(p[0]+.5)/k,(p[1]+.5)/k]);const ar=polyArea(q)/(src.width*src.height);
+  return ar>.15&&ar<.985?q:def}
+function polyArea(q){let a=0;for(let i=0;i<4;i++){const[p,r]=[q[i],q[(i+1)%4]];a+=p[0]*r[1]-r[0]*p[1]}return Math.abs(a)/2}
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+
+function aspectWH(q,iw,ih){ // q: TL,TR,BR,BL ; returns width/height
+  const u0=iw/2,v0=ih/2,m1=[...q[0],1],m2=[...q[1],1],m3=[...q[3],1],m4=[...q[2],1];
+  const cr=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],dt=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  const k2=dt(cr(m1,m4),m3)/dt(cr(m2,m4),m3),k3=dt(cr(m1,m4),m2)/dt(cr(m3,m4),m2);
+  const n2=m2.map((v,i)=>k2*v-m1[i]),n3=m3.map((v,i)=>k3*v-m1[i]);
+  const f2=-((n2[0]*n3[0]-(n2[0]*n3[2]+n2[2]*n3[0])*u0+n2[2]*n3[2]*u0*u0)+(n2[1]*n3[1]-(n2[1]*n3[2]+n2[2]*n3[1])*v0+n2[2]*n3[2]*v0*v0))/(n2[2]*n3[2]);
+  if(!(f2>0)||!isFinite(f2)||Math.abs(n2[2]*n3[2])<1e-12)return Math.hypot(n2[0],n2[1])/Math.hypot(n3[0],n3[1]);
+  const f=Math.sqrt(f2),nn=n=>{const x=(n[0]-u0*n[2])/f,y=(n[1]-v0*n[2])/f;return x*x+y*y+n[2]*n[2]};
+  return Math.sqrt(nn(n2)/nn(n3))}
+function warp(src,q){
+  let W=Math.max(dist(q[0],q[1]),dist(q[3],q[2])),H=Math.max(dist(q[0],q[3]),dist(q[1],q[2]));
+  let ar=aspectWH(q,src.width,src.height);if(!(ar>.3&&ar<3.4))ar=W/H; // true width/height from camera geometry
+  if(Math.abs(ar-.7071)/.7071<.07)ar=.7071;else if(Math.abs(ar-1.4142)/1.4142<.07)ar=1.4142; // snap to A4
+  if(ar<1)H=W/ar;else W=H*ar;
+  const k=Math.min(1,2000/Math.max(W,H));W=Math.round(W*k);H=Math.round(H*k);
+  const[[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=q,dx1=x1-x2,dx2=x3-x2,dy1=y1-y2,dy2=y3-y2,sx=x0-x1+x2-x3,sy=y0-y1+y2-y3;
+  let g=0,hh=0;if(Math.abs(sx)>1e-9||Math.abs(sy)>1e-9){const den=dx1*dy2-dx2*dy1;g=(sx*dy2-dx2*sy)/den;hh=(dx1*sy-sx*dy1)/den}
+  const a=x1-x0+g*x1,b=x3-x0+hh*x3,c=x0,d=y1-y0+g*y1,e=y3-y0+hh*y3,f=y0;
+  const sw=src.width,shh=src.height,sd=src.getContext("2d",{willReadFrequently:true}).getImageData(0,0,sw,shh).data;
+  const out=document.createElement("canvas");out.width=W;out.height=H;const ox=out.getContext("2d"),od=ox.createImageData(W,H),o=od.data;
+  for(let j=0;j<H;j++){const vv=(j+.5)/H;for(let i=0;i<W;i++){const u=(i+.5)/W,z=g*u+hh*vv+1;let X=(a*u+b*vv+c)/z-.5,Y=(d*u+e*vv+f)/z-.5;
+    if(X<0)X=0;if(Y<0)Y=0;if(X>sw-1.001)X=sw-1.001;if(Y>shh-1.001)Y=shh-1.001;const xi=X|0,yi=Y|0,fx=X-xi,fy=Y-yi,p=(yi*sw+xi)*4,p2=p+sw*4,t=(j*W+i)*4;
+    for(let ch=0;ch<3;ch++){const top=sd[p+ch]+(sd[p+4+ch]-sd[p+ch])*fx,bot=sd[p2+ch]+(sd[p2+4+ch]-sd[p2+ch])*fx;o[t+ch]=top+(bot-top)*fy}o[t+3]=255}}
+  ox.putImageData(od,0,0);return out}
+
+function enhance(cv,mode){
+  const w=cv.width,h=cv.height,out=document.createElement("canvas");out.width=w;out.height=h;const ox=out.getContext("2d");ox.drawImage(cv,0,0);
+  if(mode==="orig")return out;
+  const id=ox.getImageData(0,0,w,h),dd=id.data;
+  const sw=Math.max(4,Math.round(w/24)),sh=Math.max(4,Math.round(h/24)),s=document.createElement("canvas");s.width=sw;s.height=sh;const sx=s.getContext("2d",{willReadFrequently:true});sx.imageSmoothingQuality="high";sx.drawImage(cv,0,0,sw,sh);
+  const sdI=sx.getImageData(0,0,sw,sh);
+  for(let pass=0;pass<3;pass++){const S=new Uint8ClampedArray(sdI.data),D=sdI.data;for(let y=0;y<sh;y++)for(let x=0;x<sw;x++){let bi=(y*sw+x)*4,bl=-1;
+    for(let yy=Math.max(0,y-1);yy<=Math.min(sh-1,y+1);yy++)for(let xx=Math.max(0,x-1);xx<=Math.min(sw-1,x+1);xx++){const p=(yy*sw+xx)*4,l=S[p]+S[p+1]+S[p+2];if(l>bl){bl=l;bi=p}}
+    const t=(y*sw+x)*4;D[t]=S[bi];D[t+1]=S[bi+1];D[t+2]=S[bi+2]}}
+  sx.putImageData(sdI,0,0);
+  const b=document.createElement("canvas");b.width=w;b.height=h;const bx=b.getContext("2d",{willReadFrequently:true});bx.imageSmoothingQuality="high";bx.drawImage(s,0,0,w,h);const bd=bx.getImageData(0,0,w,h).data;
+  for(let i=0;i<dd.length;i+=4){
+    if(mode==="scan"){const L=(dd[i]*.3+dd[i+1]*.59+dd[i+2]*.11)/Math.max(24,bd[i]*.3+bd[i+1]*.59+bd[i+2]*.11);let t=(L-.42)/.46;t=t<0?0:t>1?1:t;const y=255*Math.pow(t,1.35);dd[i]=dd[i+1]=dd[i+2]=y}
+    else{let r=dd[i]/Math.max(24,bd[i]),g=dd[i+1]/Math.max(24,bd[i+1]),bb=dd[i+2]/Math.max(24,bd[i+2]);const m=(r+g+bb)/3;r=m+(r-m)*1.25;g=m+(g-m)*1.25;bb=m+(bb-m)*1.25;
+      const f=x=>{let t=(x-.18)/.74;t=t<0?0:t>1?1:t;return 255*Math.pow(t,1.15)};dd[i]=f(r);dd[i+1]=f(g);dd[i+2]=f(bb)}}
+  ox.putImageData(id,0,0);return out}
+
+// ----- UI -----
+function scnOpen(){document.getElementById("scn").hidden=false;document.body.style.overflow="hidden"}
+function scnClose(){document.getElementById("scn").hidden=true;document.body.style.overflow="";SC.pages=[];SC.src=null;SC.pushedOut=null}
+async function scnTake(file){
+  scnOpen();scnBusy("أجهّز الصورة…");
+  try{SC.src=await scnLoad(file)}catch(e){scnClose();return failSheet("لم أستطع فتح الصورة.")}
+  SC.pushedOut=null;SC.q=detectQuad(SC.src);scnEdit()}
+function scnBusy(t){document.getElementById("scnStage").innerHTML=`<div class="scn-busy"><div class="spin"></div><p>${t}</p></div>`;document.getElementById("scnBar").innerHTML=""}
+function scnHead(t){document.getElementById("scnT").textContent=t;document.getElementById("scnN").textContent=SC.pages.length?`الصفحة ${SC.pages.length+1}`:""}
+function scnEdit(){
+  SC.step="edit";scnHead("ضع الزوايا على حواف الورقة");
+  document.getElementById("scnBar").innerHTML=`<div class="scn-row"><button class="scn-b ghost" id="scnAll">الصورة كاملة</button><button class="scn-b main" id="scnGo">قصّ ومسح</button></div>`;
+  const st=document.getElementById("scnStage");st.innerHTML=`<div class="scn-box" id="scnBox"><canvas id="scnC"></canvas><svg id="scnS"></svg><canvas class="loupe" id="scnL" width="200" height="200"></canvas></div>`;
+  const c=document.getElementById("scnC"),src=SC.src;const sr=st.getBoundingClientRect(),k=Math.min((sr.width-32)/src.width,(sr.height-32)/src.height);
+  const dw=Math.round(src.width*k),dh=Math.round(src.height*k);c.width=dw*2;c.height=dh*2;c.style.width=dw+"px";c.style.height=dh+"px";c.getContext("2d").drawImage(src,0,0,c.width,c.height);
+  const box=document.getElementById("scnBox");box.style.width=dw+"px";box.style.height=dh+"px";
+  const svg=document.getElementById("scnS");svg.setAttribute("viewBox",`0 0 ${dw} ${dh}`);
+  const draw=()=>{const p=SC.q.map(([x,y])=>[x*k,y*k]);
+    svg.innerHTML=`<defs><mask id="m"><rect width="${dw}" height="${dh}" fill="#fff"/><polygon points="${p.map(a=>a.join(",")).join(" ")}" fill="#000"/></mask></defs><rect width="${dw}" height="${dh}" fill="rgba(10,12,18,.55)" mask="url(#m)"/><polygon points="${p.map(a=>a.join(",")).join(" ")}" fill="rgba(242,164,75,.08)" stroke="#F2A44B" stroke-width="2.5" stroke-linejoin="round"/>`+
+    p.map((a,i)=>`<g class="hd" data-i="${i}"><circle cx="${a[0]}" cy="${a[1]}" r="24" fill="transparent"/><circle cx="${a[0]}" cy="${a[1]}" r="11" fill="#fff" stroke="#F2A44B" stroke-width="3"/></g>`).join("")};
+  draw();
+  const L=document.getElementById("scnL"),lx=L.getContext("2d");let drag=-1;
+  const loupe=(x,y)=>{L.style.display="block";L.style.left=Math.max(0,Math.min(dw-100,x*k-50))+"px";L.style.top=(y*k>130?y*k-130:y*k+30)+"px";
+    lx.clearRect(0,0,200,200);lx.save();lx.beginPath();lx.arc(100,100,100,0,7);lx.clip();lx.drawImage(src,x-50,y-50,100,100,0,0,200,200);lx.strokeStyle="#F2A44B";lx.lineWidth=3;lx.beginPath();lx.moveTo(100,80);lx.lineTo(100,120);lx.moveTo(80,100);lx.lineTo(120,100);lx.stroke();lx.restore()};
+  svg.onpointerdown=e=>{const g=e.target.closest(".hd");if(!g)return;drag=+g.dataset.i;svg.setPointerCapture(e.pointerId);e.preventDefault();loupe(...SC.q[drag])};
+  svg.onpointermove=e=>{if(drag<0)return;const r=svg.getBoundingClientRect();let x=(e.clientX-r.left)/k,y=(e.clientY-r.top)/k;x=Math.max(0,Math.min(src.width,x));y=Math.max(0,Math.min(src.height,y));SC.q[drag]=[x,y];draw();loupe(x,y)};
+  svg.onpointerup=svg.onpointercancel=()=>{drag=-1;L.style.display="none"};
+  document.getElementById("scnAll").onclick=()=>{SC.q=[[0,0],[src.width,0],[src.width,src.height],[0,src.height]];draw()};
+  document.getElementById("scnGo").onclick=()=>{scnBusy("أمسح الورقة…");setTimeout(()=>{SC.flat=warp(SC.src,SC.q);scnResult(true)},30)}}
+function scnResult(anim){
+  SC.step="result";scnHead("هذه نسختك الممسوحة");
+  SC.out=enhance(SC.flat,SC.mode);
+  const modes=[["scan","مسح"],["color","ملوّن"],["orig","الأصل"]];
+  document.getElementById("scnBar").innerHTML=`<div class="scn-modes">${modes.map(([m,t])=>`<button data-m="${m}" class="${SC.mode===m?"on":""}" aria-pressed="${SC.mode===m}">${t}</button>`).join("")}</div>
+   <div class="scn-row"><button class="scn-b ghost" id="scnBack">الحواف</button><button class="scn-b ghost" id="scnMore">+ صفحة</button><button class="scn-b main" id="scnDone">احفظ${SC.pages.length?` (${SC.pages.length+1})`:""}</button></div>`;
+  const st=document.getElementById("scnStage"),sr=st.getBoundingClientRect(),o=SC.out,k=Math.min((sr.width-40)/o.width,(sr.height-40)/o.height);
+  st.innerHTML=`<div class="scn-paper${anim?" sweep":""}" style="width:${Math.round(o.width*k)}px;height:${Math.round(o.height*k)}px"></div>`;
+  o.style.width="100%";o.style.height="100%";st.firstChild.appendChild(o);
+  document.querySelectorAll(".scn-modes button").forEach(b=>b.onclick=()=>{scnUnpush();SC.mode=b.dataset.m;scnResult(false)});
+  document.getElementById("scnBack").onclick=()=>{scnUnpush();scnEdit()};
+  document.getElementById("scnMore").onclick=async()=>{if(SC.pushedOut!==SC.out){SC.pages.push(await scnBlob(SC.out));SC.pushedOut=SC.out}if(SC.pages.length>=4){return scnFinish()}$("#file").value="";$("#file").click()};
+  document.getElementById("scnDone").onclick=async()=>{if(SC.pushedOut!==SC.out)SC.pages.push(await scnBlob(SC.out));scnFinish()}}
+function scnUnpush(){if(SC.pushedOut){SC.pages.pop();SC.pushedOut=null}}
+function scnBlob(cv){return new Promise(ok=>cv.toBlob(bl=>{const fr=new FileReader();fr.onload=()=>ok({blob:bl,b64:fr.result.split(",")[1]});fr.readAsDataURL(bl)},"image/jpeg",.8))}
+function scnFinish(){const imgs=SC.pages.slice(0,4);scnClose();analyzeAndFile(imgs)}
+
 function failSheet(t,detail){openSheet(`<h2 style="color:var(--ink);font-size:20px;margin:6px 0 10px">${esc(t)}</h2>${detail?`<p class="sub" style="direction:ltr;text-align:left">${esc(detail)}</p>`:""}<div class="btns"><button class="btn b-ink" onclick="closeSheet()">حسناً</button></div>`)}
 function shrink(file,max,q){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);c.toBlob(bl=>{const fr=new FileReader();fr.onload=()=>ok({blob:bl,b64:fr.result.split(",")[1]});fr.readAsDataURL(bl)},"image/jpeg",q);URL.revokeObjectURL(u)};i.onerror=bad;i.src=u})}
 async function fileDoc(res,imgs){
