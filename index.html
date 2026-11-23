@@ -390,7 +390,7 @@ async function analyzeAndFile(imgs){
   openSheet(`<div class="spin"></div><p style="text-align:center;font-weight:600;font-size:17px" id="stage">أقرأ الرسالة…</p><p class="sub" style="text-align:center;margin-top:6px">Claude يقرأها ويقرّر مكانها</p>`);
   const {data:{session}}=await sb.auth.getSession();
   let res;try{
-    const r=await fetch(SUPABASE_URL+"/functions/v1/analyze",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY},body:JSON.stringify({images:imgs.map(x=>x.b64),lang:"ar"})});
+    const r=await fetch(SUPABASE_URL+"/functions/v1/analyze",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY},body:JSON.stringify({images:imgs.slice(0,4).map(x=>x.b64),lang:"ar"})});
     res=await r.json();if(!r.ok||res.error)throw new Error(res.error||r.status);
   }catch(err){return failSheet("لم تنجح القراءة. تأكد من الإنترنت وجرّب مرة أخرى.",String(err.message||err))}
   $("#stage").textContent="أحفظ الورقة في مكانها…";
@@ -503,11 +503,11 @@ function scnResult(anim){
   o.style.width="100%";o.style.height="100%";st.firstChild.appendChild(o);
   document.querySelectorAll(".scn-modes button").forEach(b=>b.onclick=()=>{scnUnpush();SC.mode=b.dataset.m;scnResult(false)});
   document.getElementById("scnBack").onclick=()=>{scnUnpush();scnEdit()};
-  document.getElementById("scnMore").onclick=async()=>{if(SC.pushedOut!==SC.out){SC.pages.push(await scnBlob(SC.out));SC.pushedOut=SC.out}if(SC.pages.length>=4){return scnFinish()}$("#file").value="";$("#file").click()};
+  document.getElementById("scnMore").onclick=async()=>{if(SC.pushedOut!==SC.out){SC.pages.push(await scnBlob(SC.out));SC.pushedOut=SC.out}if(SC.pages.length>=20){return scnFinish()}$("#file").value="";$("#file").click()};
   document.getElementById("scnDone").onclick=async()=>{if(SC.pushedOut!==SC.out)SC.pages.push(await scnBlob(SC.out));scnFinish()}}
 function scnUnpush(){if(SC.pushedOut){SC.pages.pop();SC.pushedOut=null}}
 function scnBlob(cv){return new Promise(ok=>cv.toBlob(bl=>{const fr=new FileReader();fr.onload=()=>ok({blob:bl,b64:fr.result.split(",")[1]});fr.readAsDataURL(bl)},"image/jpeg",.8))}
-function scnFinish(){const imgs=SC.pages.slice(0,4);scnClose();analyzeAndFile(imgs)}
+function scnFinish(){const imgs=SC.pages.slice(0,20);scnClose();analyzeAndFile(imgs)}
 
 function failSheet(t,detail){openSheet(`<h2 style="color:var(--ink);font-size:20px;margin:6px 0 10px">${esc(t)}</h2>${detail?`<p class="sub" style="direction:ltr;text-align:left">${esc(detail)}</p>`:""}<div class="btns"><button class="btn b-ink" onclick="closeSheet()">حسناً</button></div>`)}
 function shrink(file,max,q){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);c.toBlob(bl=>{const fr=new FileReader();fr.onload=()=>ok({blob:bl,b64:fr.result.split(",")[1]});fr.readAsDataURL(bl)},"image/jpeg",q);URL.revokeObjectURL(u)};i.onerror=bad;i.src=u})}
