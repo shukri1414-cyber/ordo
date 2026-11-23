@@ -563,11 +563,13 @@ function placeCard(b,s,no){
 $("#scanBtn").onclick=()=>{SC.pages=[];$("#file").value="";$("#file").click()};
 $("#file").onchange=e=>{const f=e.target.files[0];if(f)scnTake(f)};
 $("#scnX").onclick=scnClose;
+function aiCopy(blob){return new Promise(ok=>{const u=URL.createObjectURL(blob),i=new Image();i.onload=()=>{const k=Math.min(1,1300/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL("image/jpeg",.72).split(",")[1])};i.src=u})}
 async function analyzeAndFile(imgs){
   openSheet(`<div class="spin"></div><p style="text-align:center;font-weight:600;font-size:17px" id="stage">${t("reading")}</p><p class="sub" style="text-align:center;margin-top:6px">${t("readingSub")}</p>`);
   const {data:{session}}=await sb.auth.getSession();
+  const small=await Promise.all(imgs.slice(0,4).map(x=>aiCopy(x.blob)));
   let res;try{
-    const call=async()=>{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),90000);try{const r=await fetch(SUPABASE_URL+"/functions/v1/analyze",{signal:ctl.signal,method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY},body:JSON.stringify({images:imgs.slice(0,4).map(x=>x.b64),lang:LANG})});let j;try{j=await r.json()}catch(e){j={error:"HTTP "+r.status}}if(!r.ok||j.error){const e=new Error(j.error||r.status);e.retry=r.status>=500;throw e}return j}finally{clearTimeout(tm)}};
+    const call=async()=>{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),90000);try{const r=await fetch(SUPABASE_URL+"/functions/v1/analyze",{signal:ctl.signal,method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY},body:JSON.stringify({images:small,lang:LANG})});let j;try{j=await r.json()}catch(e){j={error:"HTTP "+r.status}}if(!r.ok||j.error){const e=new Error(j.error||r.status);e.retry=r.status>=500;throw e}return j}finally{clearTimeout(tm)}};
     try{res=await call()}catch(e){if(!e.retry)throw e;await new Promise(r=>setTimeout(r,1500));res=await call()}
   }catch(err){return failSheet(t("readFail"),String(err.message||err))}
   $("#stage").textContent=t("saving");
