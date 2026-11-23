@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F7F7F9">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F7F7F9"><meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0E0F12">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Ordo">
@@ -31,7 +31,7 @@ body{font-family:"IBM Plex Sans Arabic","IBM Plex Sans",system-ui,-apple-system,
 button,input{font:inherit;color:inherit}
 button{border:0;background:none;cursor:pointer}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #2F5BD3;outline-offset:2px}
-.wrap{max-width:560px;margin:0 auto;min-height:100vh;position:relative;padding:calc(env(safe-area-inset-top) + 20px) 22px calc(170px + env(safe-area-inset-bottom))}
+.wrap{max-width:560px;margin:0 auto;min-height:100vh;position:relative;padding:calc(env(safe-area-inset-top) + 18px) 22px calc(130px + env(safe-area-inset-bottom))}
 .brand{display:flex;align-items:center;gap:7px;direction:ltr;justify-content:flex-end;font-weight:700;font-size:17px;letter-spacing:-.4px}
 .ring{width:20px;height:20px;border-radius:50%;border:4px solid currentColor;position:relative;display:block}
 .ring::after{content:"";position:absolute;left:50%;top:-6px;width:4px;height:6px;margin-left:-2px;background:#F2A44B;border-radius:2px}
@@ -60,12 +60,13 @@ h2{font-size:14px;font-weight:500;color:var(--mute);margin:30px 2px 12px}
 .sub{font-size:12.5px;color:var(--mute)}
 .code{font-size:12px;font-weight:600;padding:5px 9px;border-radius:8px;white-space:nowrap;direction:ltr}
 .empty{text-align:center;padding:30px 16px;color:var(--mute);line-height:1.7;font-size:14.5px}
-.dock{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(rgba(236,237,240,0),rgba(236,237,240,.85) 40%);padding:26px 22px calc(18px + env(safe-area-inset-bottom));z-index:10}
+.dock{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(rgba(236,237,240,0),rgba(236,237,240,.85) 40%);padding:30px 16px calc(10px + env(safe-area-inset-bottom));z-index:10;pointer-events:none}
+.dock nav{pointer-events:auto}
 .dock-in{max-width:516px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
 .scan{height:64px;border-radius:22px;background:linear-gradient(180deg,#23262D,#121418);color:#fff;font-size:17.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 16px 30px -14px rgba(18,20,24,.7)}
 .scan svg{width:34px;height:34px;padding:7px;border-radius:11px;background:#F2A44B;color:#121418}
 .scan:active{transform:scale(.985)}
-nav{display:flex;justify-content:space-around;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6);border-radius:22px;padding:6px 4px;box-shadow:0 0 0 1px rgba(255,255,255,.6),0 10px 24px -14px rgba(18,20,24,.3)}
+nav{display:flex;justify-content:space-around;align-items:center;background:rgba(255,255,255,.72);-webkit-backdrop-filter:blur(20px) saturate(1.6);backdrop-filter:blur(20px) saturate(1.6);border-radius:22px;padding:6px 4px;box-shadow:0 0 0 1px rgba(255,255,255,.6),0 10px 24px -14px rgba(18,20,24,.3)}
 nav button{font-size:12px;color:var(--mute);display:flex;flex-direction:column;align-items:center;gap:4px;min-width:64px;min-height:44px}
 nav button.on{color:var(--ink);font-weight:600}
 .shelf{padding:22px 16px 0;margin-top:24px}
@@ -230,6 +231,79 @@ nav button.on{color:var(--ink);font-weight:600}
 [dir=ltr] .fly{right:auto;left:76px}
 [dir=ltr] #scnN{text-align:right}
 [dir=ltr] h1{letter-spacing:-.5px}
+
+/* ===== v7 ===== */
+.fab{min-width:72px !important;position:relative;margin-top:-34px}
+.fab-in{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;color:#121418;background:radial-gradient(circle at 35% 30%,#FFD08A,#F2A44B 55%,#D9862A);box-shadow:inset 0 2px 0 rgba(255,255,255,.55),inset 0 -3px 6px rgba(120,60,0,.25),0 0 0 6px rgba(255,255,255,.9),0 14px 28px -8px rgba(217,134,42,.75);transition:transform .2s cubic-bezier(.2,.8,.2,1)}
+.fab:active .fab-in{transform:scale(.92)}
+nav button svg{transition:transform .2s}nav button.on svg{transform:translateY(-1px)}
+nav button.on{position:relative}nav button.on::after{content:"";position:absolute;bottom:-4px;width:5px;height:5px;border-radius:50%;background:#F2A44B}
+/* header */
+.top{align-items:center}
+.logo2{display:flex;align-items:center;gap:7px;direction:ltr;font:700 19px/1 "IBM Plex Sans",sans-serif;letter-spacing:-.4px}
+.greet{margin-top:22px}
+.greet h1{font-size:31px;font-weight:600;letter-spacing:-.4px;line-height:1.2}
+.smart{display:inline-flex;align-items:center;gap:8px;margin-top:10px;font-size:14px;color:var(--mute);background:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.8);padding:6px 12px 6px 10px;border-radius:20px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.smart i{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 4px rgba(31,157,107,.15)}
+.smart.warn i{background:#E05A3C;box-shadow:0 0 0 4px rgba(224,90,60,.15)}
+.av{width:42px;height:42px;font-size:16px;font-weight:600;border:3px solid #fff;box-shadow:0 6px 14px -6px rgba(18,20,24,.4);text-transform:uppercase}
+/* binder pull-out on tap */
+.spine .ord{transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.spine.pull .ord{transform:translateY(-22px)}
+.bhead{animation:openB .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes openB{from{transform:translateY(-24px) scaleY(.92);opacity:.4}}
+.cntb.bump{animation:bump .9s .3s cubic-bezier(.3,1.6,.5,1) both}
+@keyframes bump{0%{transform:translateX(-50%) scale(.2);opacity:0}60%{transform:translateX(-50%) scale(1.35)}100%{transform:translateX(-50%) scale(1)}}
+.spine.glow .ord{animation:glow 1.6s .2s ease-out}
+@keyframes glow{30%{box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 0 0 3px #F2A44B,0 0 30px 6px rgba(242,164,75,.6)}}
+/* start card */
+.start2{margin-top:24px;overflow:hidden;padding:0}
+.s2-art{position:relative;height:190px;background:radial-gradient(70% 90% at 30% 0%,#FFFFFF,#EEF0F3 80%);overflow:hidden}
+.s2-paper{position:absolute;left:50%;top:26px;width:92px;height:122px;margin-left:-46px;background:#fff;border-radius:7px;box-shadow:0 16px 28px -14px rgba(18,20,24,.4),0 0 0 1px var(--line);padding:14px 12px;display:flex;flex-direction:column;gap:7px;animation:s2p 5s cubic-bezier(.6,0,.3,1) infinite}
+.s2-paper i{display:block;height:4px;border-radius:2px;background:#D5D9E0}.s2-paper i:first-child{width:55%;background:#1F9D6B}
+.s2-paper em{position:absolute;bottom:12px;inset-inline-end:10px;font-style:normal;font-size:11.5px;font-weight:700;background:#FFE58A;padding:1px 6px;border-radius:5px;direction:ltr;opacity:0;animation:s2n 5s infinite}
+.s2-scan{position:absolute;left:-8px;right:-8px;height:3px;top:0;border-radius:2px;background:#F2A44B;box-shadow:0 0 14px 3px rgba(242,164,75,.7);opacity:0;animation:s2s 5s infinite}
+.s2-frame{position:absolute;left:50%;top:14px;width:120px;height:146px;margin-left:-60px;opacity:0;animation:s2f 5s infinite}
+.s2-frame b{position:absolute;width:20px;height:20px;border:3px solid #F2A44B}
+.s2-frame b:nth-child(1){top:0;left:0;border-right:0;border-bottom:0;border-radius:6px 0 0 0}.s2-frame b:nth-child(2){top:0;right:0;border-left:0;border-bottom:0;border-radius:0 6px 0 0}
+.s2-frame b:nth-child(3){bottom:0;left:0;border-right:0;border-top:0;border-radius:0 0 0 6px}.s2-frame b:nth-child(4){bottom:0;right:0;border-left:0;border-top:0;border-radius:0 0 6px 0}
+.s2-bin{position:absolute;bottom:0;inset-inline-end:34px;display:flex;gap:4px;align-items:flex-end}
+.s2-bin .ord.mini{height:96px}
+.s2-bin .b2 .ord{animation:s2b 5s infinite}
+@keyframes s2f{0%,5%{opacity:0;transform:scale(1.15)}12%,38%{opacity:1;transform:scale(1)}45%,100%{opacity:0}}
+@keyframes s2s{0%,12%{opacity:0;top:20px}15%{opacity:1}35%{opacity:1;top:150px}38%,100%{opacity:0;top:150px}}
+@keyframes s2n{0%,40%{opacity:0;transform:scale(.4)}46%,72%{opacity:1;transform:scale(1)}80%,100%{opacity:0}}
+@keyframes s2p{0%,50%{transform:none;opacity:1}78%{transform:translate(var(--fx),70px) scale(.28) rotate(-6deg);opacity:1}84%,92%{transform:translate(var(--fx),90px) scale(.2);opacity:0}100%{transform:none;opacity:0}}
+@keyframes s2b{0%,78%{transform:none}84%{transform:translateY(-8px)}92%,100%{transform:none}}
+.s2-txt{padding:20px 20px 22px}
+.s2-txt h3{font-size:20px;font-weight:600;letter-spacing:-.2px}
+.s2-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.s2-steps div{background:var(--soft);border-radius:16px;padding:12px 10px;display:flex;flex-direction:column;gap:6px}
+.s2-steps b{font-size:14px;font-weight:600}.s2-steps span{font-size:12px;color:var(--mute);line-height:1.45}
+.s2-steps svg{color:#D9862A}
+@media (prefers-reduced-motion:reduce){.s2-paper,.s2-scan,.s2-frame,.s2-paper em,.s2-bin .ord,.bhead,.cntb.bump,.spine.glow .ord{animation:none}.s2-paper em{opacity:1}}
+/* ===== dark mode ===== */
+@media (prefers-color-scheme:dark){
+ :root{--bg:#0E0F12;--card:#17191E;--ink:#F2F3F5;--mute:#9AA1AE;--line:#262A31;--soft:#1F2228;--red:#FF8A75;--redbg:rgba(224,90,60,.18);--amber:#F5B66C;--amberbg:rgba(242,164,75,.15);--sh:0 0 0 1px rgba(255,255,255,.05),0 14px 30px -16px rgba(0,0,0,.8)}
+ html{background:#0E0F12}
+ body::before{background:radial-gradient(55% 32% at 8% 0%,rgba(47,91,211,.22),rgba(47,91,211,0) 70%),radial-gradient(50% 30% at 96% 4%,rgba(242,164,75,.16),rgba(242,164,75,0) 70%),radial-gradient(70% 35% at 30% 100%,rgba(31,157,107,.10),rgba(31,157,107,0) 70%),linear-gradient(180deg,#121419,#0B0C0F)}
+ .dock{background:linear-gradient(rgba(11,12,15,0),rgba(11,12,15,.85) 40%)}
+ nav{background:rgba(28,31,37,.72);box-shadow:0 0 0 1px rgba(255,255,255,.07),0 10px 24px -10px rgba(0,0,0,.8)}
+ .fab-in{box-shadow:inset 0 2px 0 rgba(255,255,255,.55),inset 0 -3px 6px rgba(120,60,0,.25),0 0 0 6px #16181D,0 14px 28px -8px rgba(217,134,42,.6)}
+ .smart{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08)}
+ .av{border-color:#17191E}
+ .hero{box-shadow:0 0 0 1px rgba(255,255,255,.06),0 24px 40px -22px #000}
+ .wall{background:radial-gradient(120% 70% at 50% 0%,#252830,#15171B 70%)}
+ .s2-art{background:radial-gradient(70% 90% at 30% 0%,#2A2D35,#17191E 80%)}
+ .thumb,.b-soft,.search,.field input,.langs:not(.dark){background:#1F2228}
+ .b-ink,.start li::before,.langs:not(.dark) button.on{background:#F2F3F5;color:#121418}
+ .toast{background:#2A2E36}
+ .p-ok{background:rgba(31,157,107,.2);color:#6FD3A6}.p-mute{background:#262A31}
+ .chip.on{color:#121418}
+ .sheet{background:#121419}
+ .ov{background:rgba(0,0,0,.6)}
+ .grab{background:#33373F}
+}
 .scn{position:fixed;inset:0;z-index:60;background:#0F1218;color:#fff;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 .scn[hidden]{display:none}
 .scn-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px 6px}
@@ -261,10 +335,10 @@ nav button.on{color:var(--ink);font-weight:600}
 <body>
 <div class="wrap" id="app"></div>
 <div class="dock" id="dock" hidden><div class="dock-in">
-<button class="scan" id="scanBtn"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M8 12h8"/></svg><span data-t="scanNew">صوّر ورقة جديدة</span></button>
 <nav id="nav">
 <button data-v="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span data-t="home">الرئيسية</span></button>
 <button data-v="lib"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h3v16H5zM10.5 4h3v16h-3zM16 5l3 .8-3.6 14.4-3-.8"/></svg><span data-t="library">المكتبة</span></button>
+<button class="fab" id="scanBtn" aria-label="صوّر ورقة جديدة" data-ta="scanNew"><span class="fab-in"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M8 12h8"/></svg></span></button>
 <button data-v="search"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span data-t="search">البحث</span></button>
 <button data-v="more"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg><span data-t="family">العائلة</span></button>
 </nav>
@@ -293,7 +367,7 @@ const LANGS=[["ar","العربية"],["en","English"],["de","Deutsch"],["nl","Ne
 let LANG=(()=>{try{const s=localStorage.getItem("ordo_lang");if(s)return s}catch(e){}const n=(navigator.language||"ar").slice(0,2);return["ar","en","de","nl"].includes(n)?n:"ar"})();
 const LOC={ar:"ar-u-nu-latn",en:"en-GB",de:"de-DE",nl:"nl-NL"};
 const I={
-ar:{file:"الملف",num:"رقم",unfiled:"غير مصنّف",overdue:"انتهى الموعد",todayEx:"اليوم!",left:n=>`باقي ${n} ${n===1?"يوم":n<=10?"أيام":"يوماً"}`,dayw:n=>n===1?"يوم":n<=10?"أيام":"يوماً",
+ar:{smartNone:"لا مواعيد قريبة · كل شيء مرتّب",smartSome:(n,d)=>`${n} ${n===1?"موعد":n<=10?"مواعيد":"موعداً"} — أقربها ${d<=0?"اليوم":`بعد ${d} ${d===1?"يوم":d<=10?"أيام":"يوماً"}`}`,s1s:"الماسح يقصّ الورقة ويوضّحها",s2s:"Claude يشرحها بلغتك",s3s:"رقمها وملفها جاهزان",file:"الملف",num:"رقم",unfiled:"غير مصنّف",overdue:"انتهى الموعد",todayEx:"اليوم!",left:n=>`باقي ${n} ${n===1?"يوم":n<=10?"أيام":"يوماً"}`,dayw:n=>n===1?"يوم":n<=10?"أيام":"يوماً",
  gm:"صباح الخير",ga:"نهارك سعيد",ge:"مساء الخير",and:" و ",papers:n=>n===1?"ورقة":n>=3&&n<=10?"أوراق":"ورقة",homeLib:"مكتبة البيت",upcoming:"مواعيد قريبة",bindersN:"ملفات",attention:"تحتاج انتباهكم",over:"انتهى",today:"اليوم",recent:"آخر الأوراق",
  startH:"ابدأ بأول رسالة",s1b:"صوّر",s1:"الرسالة بالكاميرا، والماسح يقصّها ويجعلها واضحة.",s2b:"افهم",s2:"Ordo يقرأها ويشرحها لك بالعربية مع الموعد.",s3b:"ضعها",s3:"يقول لك الملف والقسم والرقم، فتضعها هناك.",
  library:"المكتبة",inDrawer:(a,b)=>`${a} ملفات في الدرج · ${b} ${b===1?"ورقة":b>=3&&b<=10?"أوراق":"ورقة"}`,secsDocs:(a,b)=>`${a} أقسام · ${b} ورقة`,noInSec:"لا أوراق في هذا القسم بعد.",numsNote:"الأرقام هنا هي نفس الأرقام المكتوبة على الأوراق في الملف",
@@ -308,7 +382,7 @@ ar:{file:"الملف",num:"رقم",unfiled:"غير مصنّف",overdue:"انته
  writeNo:(n,s)=>`اكتب <b style="color:var(--ink)">${n}</b> في زاوية الورقة، وضعها في قسم ${s}. نسختها محفوظة في نفس المكان داخل Ordo.`,filedBtn:"وضعتها في الملف ✓",notDone:"لم تُنجز بعد",doneBtn:"تم الرد ✓",move:"غيّر المكان",del:"حذف الورقة",
  doneToast:"تم. أحسنتم 👍",reopened:"أُعيدت إلى قائمة الانتباه",pageAlt:"صفحة من الرسالة",chooseLoc:"اختر المكان الصحيح",newNo:"ستأخذ الورقة رقماً جديداً في القسم الذي تختاره.",current:"الحالي",moveFail:"لم ينجح النقل",
  delQ:"حذف هذه الورقة من Ordo؟",delInfo:"تُحذف الصور والمعلومات نهائياً. الورقة الأصلية في الملف لا تتأثر.",back:"رجوع",delYes:"حذف نهائياً",delFail:"لم ينجح الحذف",deleted:"حُذفت"},
-en:{file:"Binder",num:"No.",unfiled:"Unfiled",overdue:"Overdue",todayEx:"Today!",left:n=>n===1?"1 day left":`${n} days left`,dayw:n=>n===1?"day":"days",
+en:{smartNone:"No deadlines coming up · all in order",smartSome:(n,d)=>`${n} deadline${n>1?"s":""} — next ${d<=0?"today":d===1?"tomorrow":`in ${d} days`}`,s1s:"The scanner crops and cleans it",s2s:"Claude explains it in your language",s3s:"You get its binder and number",file:"Binder",num:"No.",unfiled:"Unfiled",overdue:"Overdue",todayEx:"Today!",left:n=>n===1?"1 day left":`${n} days left`,dayw:n=>n===1?"day":"days",
  gm:"Good morning",ga:"Good afternoon",ge:"Good evening",and:" & ",papers:n=>n===1?"document":"documents",homeLib:"Home library",upcoming:"upcoming",bindersN:"binders",attention:"Needs your attention",over:"Overdue",today:"Today",recent:"Recent documents",
  startH:"Start with your first letter",s1b:"Scan",s1:"the letter with your camera. The scanner crops and cleans it.",s2b:"Understand",s2:"Ordo reads it and explains it in plain English, with the deadline.",s3b:"File it",s3:"Ordo tells you the binder, section and number. Put it there.",
  library:"Library",inDrawer:(a,b)=>`${a} binders · ${b} ${b===1?"document":"documents"}`,secsDocs:(a,b)=>`${a} sections · ${b} docs`,noInSec:"No documents in this section yet.",numsNote:"These numbers match the numbers written on the papers in the binder",
@@ -323,7 +397,7 @@ en:{file:"Binder",num:"No.",unfiled:"Unfiled",overdue:"Overdue",todayEx:"Today!"
  writeNo:(n,s)=>`Write <b style="color:var(--ink)">${n}</b> in the corner of the paper and put it in ${s}. The copy is saved in the same place in Ordo.`,filedBtn:"Filed it ✓",notDone:"Not done yet",doneBtn:"Done ✓",move:"Move",del:"Delete document",
  doneToast:"Done. Well done 👍",reopened:"Back on the attention list",pageAlt:"Page of the letter",chooseLoc:"Choose the right place",newNo:"The document gets a new number in the section you choose.",current:"Current",moveFail:"Move failed",
  delQ:"Delete this document from Ordo?",delInfo:"Scans and details are deleted permanently. The paper in the binder is not affected.",back:"Back",delYes:"Delete permanently",delFail:"Delete failed",deleted:"Deleted"},
-de:{file:"Ordner",num:"Nr.",unfiled:"Nicht abgelegt",overdue:"Frist abgelaufen",todayEx:"Heute!",left:n=>n===1?"noch 1 Tag":`noch ${n} Tage`,dayw:n=>n===1?"Tag":"Tage",
+de:{smartNone:"Keine Fristen · alles in Ordnung",smartSome:(n,d)=>`${n} Frist${n>1?"en":""} – nächste ${d<=0?"heute":d===1?"morgen":`in ${d} Tagen`}`,s1s:"Der Scanner schneidet zu und schärft",s2s:"Claude erklärt ihn in deiner Sprache",s3s:"Du bekommst Ordner und Nummer",file:"Ordner",num:"Nr.",unfiled:"Nicht abgelegt",overdue:"Frist abgelaufen",todayEx:"Heute!",left:n=>n===1?"noch 1 Tag":`noch ${n} Tage`,dayw:n=>n===1?"Tag":"Tage",
  gm:"Guten Morgen",ga:"Guten Tag",ge:"Guten Abend",and:" & ",papers:n=>n===1?"Dokument":"Dokumente",homeLib:"Hausarchiv",upcoming:"Fristen",bindersN:"Ordner",attention:"Braucht eure Aufmerksamkeit",over:"Vorbei",today:"Heute",recent:"Zuletzt abgelegt",
  startH:"Fang mit dem ersten Brief an",s1b:"Scannen",s1:"Brief mit der Kamera aufnehmen. Der Scanner schneidet ihn zu und macht ihn klar.",s2b:"Verstehen",s2:"Ordo liest ihn und erklärt ihn verständlich, mit Frist.",s3b:"Ablegen",s3:"Ordo nennt Ordner, Fach und Nummer. Dort legst du ihn ab.",
  library:"Archiv",inDrawer:(a,b)=>`${a} Ordner · ${b} ${b===1?"Dokument":"Dokumente"}`,secsDocs:(a,b)=>`${a} Fächer · ${b} Dok.`,noInSec:"Noch keine Dokumente in diesem Fach.",numsNote:"Diese Nummern stehen auch auf den Papieren im Ordner",
@@ -338,7 +412,7 @@ de:{file:"Ordner",num:"Nr.",unfiled:"Nicht abgelegt",overdue:"Frist abgelaufen",
  writeNo:(n,s)=>`Schreib <b style="color:var(--ink)">${n}</b> in die Ecke des Papiers und leg es ins Fach ${s}. Die Kopie liegt am selben Platz in Ordo.`,filedBtn:"Abgelegt ✓",notDone:"Noch offen",doneBtn:"Erledigt ✓",move:"Verschieben",del:"Dokument löschen",
  doneToast:"Erledigt 👍",reopened:"Wieder auf der Liste",pageAlt:"Seite des Briefs",chooseLoc:"Richtigen Platz wählen",newNo:"Das Dokument bekommt im gewählten Fach eine neue Nummer.",current:"Aktuell",moveFail:"Verschieben fehlgeschlagen",
  delQ:"Dieses Dokument aus Ordo löschen?",delInfo:"Scans und Angaben werden endgültig gelöscht. Das Papier im Ordner bleibt.",back:"Zurück",delYes:"Endgültig löschen",delFail:"Löschen fehlgeschlagen",deleted:"Gelöscht"},
-nl:{file:"Map",num:"Nr.",unfiled:"Niet opgeborgen",overdue:"Verlopen",todayEx:"Vandaag!",left:n=>n===1?"nog 1 dag":`nog ${n} dagen`,dayw:n=>n===1?"dag":"dagen",
+nl:{smartNone:"Geen deadlines · alles op orde",smartSome:(n,d)=>`${n} deadline${n>1?"s":""} — eerstvolgende ${d<=0?"vandaag":d===1?"morgen":`over ${d} dagen`}`,s1s:"De scanner snijdt bij en maakt scherp",s2s:"Claude legt hem uit in jouw taal",s3s:"Je krijgt de map en het nummer",file:"Map",num:"Nr.",unfiled:"Niet opgeborgen",overdue:"Verlopen",todayEx:"Vandaag!",left:n=>n===1?"nog 1 dag":`nog ${n} dagen`,dayw:n=>n===1?"dag":"dagen",
  gm:"Goedemorgen",ga:"Goedemiddag",ge:"Goedenavond",and:" & ",papers:n=>n===1?"document":"documenten",homeLib:"Thuisarchief",upcoming:"deadlines",bindersN:"mappen",attention:"Vraagt jullie aandacht",over:"Verlopen",today:"Vandaag",recent:"Recent opgeborgen",
  startH:"Begin met je eerste brief",s1b:"Scan",s1:"de brief met je camera. De scanner snijdt hem bij en maakt hem scherp.",s2b:"Begrijp",s2:"Ordo leest hem en legt hem helder uit, met de deadline.",s3b:"Berg op",s3:"Ordo zegt je de map, het tabblad en het nummer. Daar berg je hem op.",
  library:"Archief",inDrawer:(a,b)=>`${a} mappen · ${b} ${b===1?"document":"documenten"}`,secsDocs:(a,b)=>`${a} tabbladen · ${b} doc.`,noInSec:"Nog geen documenten in dit tabblad.",numsNote:"Deze nummers staan ook op de papieren in de map",
@@ -360,7 +434,7 @@ const NAMES={"العائلة والأطفال":["Family & kids","Familie & Kinde
  "AOK – التأمين الصحي":["AOK – health insurance","AOK – Krankenversicherung","AOK – zorgverzekering"],"الأطباء والمستشفى":["Doctors & hospital","Ärzte & Krankenhaus","Artsen & ziekenhuis"],"تأمينات أخرى":["Other insurance","Weitere Versicherungen","Overige verzekeringen"],
  "الشركة ProWaal":["ProWaal company","Firma ProWaal","Bedrijf ProWaal"],"السيارة":["Car","Auto","Auto"],"البنك والقروض":["Bank & loans","Bank & Kredite","Bank & leningen"],"متفرقات":["Miscellaneous","Sonstiges","Overig"]};
 const tn=n=>{const x=NAMES[n];if(!x||LANG==="ar")return n;return x[{en:0,de:1,nl:2}[LANG]]};
-function applyLang(){document.documentElement.lang=LANG;document.documentElement.dir=LANG==="ar"?"rtl":"ltr";document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t(e.dataset.t))}
+function applyLang(){document.documentElement.lang=LANG;document.documentElement.dir=LANG==="ar"?"rtl":"ltr";document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t(e.dataset.t));document.querySelectorAll("[data-ta]").forEach(e=>e.setAttribute("aria-label",t(e.dataset.ta)))}
 function setLang(l){LANG=l;try{localStorage.setItem("ordo_lang",l)}catch(e){}applyLang();render()}
 function langPicker(dark){return`<div class="langs${dark?" dark":""}" role="group" aria-label="${t("language")}">${LANGS.map(([k,n])=>`<button type="button" data-lang="${k}" class="${k===LANG?"on":""}" aria-pressed="${k===LANG}">${k==="ar"?"ع":k.toUpperCase()}<span class="vh">${n}</span></button>`).join("")}</div>`}
 const cap=n=>{n=String(n||"");return n&&/[a-z]/.test(n[0])?n[0].toUpperCase()+n.slice(1):n};
@@ -408,12 +482,14 @@ function docRow(d){
   return`<button class="row" data-doc="${d.id}"><span class="thumb"><i></i><i style="width:70%"></i><i style="width:50%;background:${c}"></i></span><span class="grow"><span>${esc(d.title||d.sender||t("letter"))}</span><span class="sub">${esc(d.sender||"")}${who?" · "+esc(who.display_name):""}</span></span>${codeChip(d)}</button>`}
 function homeView(){
   const att=docs.filter(d=>d.deadline&&!d.done&&daysLeft(d.deadline)>=-7).sort((a,b)=>a.deadline.localeCompare(b.deadline));
-  return`<div class="top"><div><span class="brand">Ordo<span class="ring" aria-hidden="true"></span></span><p class="sub" style="margin-top:18px;font-size:13.5px">${todayStr()}</p><h1 style="margin-top:2px">${greet()}${LANG==="ar"?"،":","} ${esc(cap(member.display_name))}</h1></div>${avatars()}</div>
-  <section class="hero"><div class="hero-top"><div><span class="hk">${t("homeLib")}</span><b class="hv">${docs.length} <small>${t("papers",docs.length)}</small></b></div><div class="hstats"><span><b>${att.length}</b> ${t("upcoming")}</span><span><b>${binders.length}</b> ${t("bindersN")}</span></div></div>
-  <div class="hshelf2">${binders.map(b=>{const n=docs.filter(d=>d.binder_id===b.id).length;return`<button class="spine" data-binder="${b.id}" aria-label="${esc(tn(b.name))}">${n?`<span class="cntb">${n}</span>`:""}${ordner(b,214)}</button>`}).join("")}</div><div class="hplank"></div></section>
+  const nd=att.length?daysLeft(att[0].deadline):0;
+  return`<div class="top"><span class="logo2">Ordo<span class="ring" aria-hidden="true"></span></span>${avatars()}</div><div class="greet"><p class="sub" style="font-size:13.5px">${todayStr()}</p><h1>${greet()}${LANG==="ar"?"،":","} ${esc(cap(member.display_name))}</h1><span class="smart${att.length?" warn":""}"><i></i>${att.length?t("smartSome",att.length,nd):t("smartNone")}</span></div>
+  <section class="hero"><div class="hero-top"><div><span class="hk">${t("homeLib")}</span><b class="hv">${docs.length} <small>${t("papers",docs.length)}</small></b></div></div>
+  <div class="hshelf2">${binders.map(b=>{const n=docs.filter(d=>d.binder_id===b.id).length;const hot=b.id===window.lastFiled;return`<button class="spine${hot?" glow":""}" data-binder="${b.id}" aria-label="${esc(tn(b.name))}">${n?`<span class="cntb${hot?" bump":""}">${n}</span>`:""}${ordner(b,214)}</button>`}).join("")}</div><div class="hplank"></div></section>
   ${att.length?`<h2>${t("attention")}</h2>${att.map(d=>{const b=binderOf(d.binder_id);const n=daysLeft(d.deadline),urg=n<=7;return`<button class="card att" data-doc="${d.id}"><span class="cnt" style="background:${urg?"var(--redbg)":"var(--amberbg)"};color:${urg?"var(--red)":"var(--amber)"}">${n<0?`<small>${t("over")}</small>`:n===0?`<b>!</b><small>${t("today")}</small>`:`<b>${n}</b><small>${t("dayw",n)}</small>`}</span><span style="flex:1;display:flex;flex-direction:column"><span class="t"><b>${esc(d.title||d.sender)}</b></span><p>${esc(d.action||d.summary||"")}</p><span class="loc" style="color:${b?b.color:"#999"}">${esc(locText(d))}</span></span></button>`}).join("")}`:""}
   ${docs.length?`<h2>${t("recent")}</h2>`:""}
-  ${docs.length?`<div class="card" style="padding:2px 16px">${docs.slice(0,8).map(docRow).join("")}</div>`:`<div class="card start"><div class="st-art" aria-hidden="true"><span class="st-p"><i style="width:55%;background:#1F9D6B"></i><i></i><i></i><i style="width:70%"></i><em>2 · 01</em></span></div><h3>${t("startH")}</h3><ol><li><span><b>${t("s1b")}</b> ${t("s1")}</span></li><li><span><b>${t("s2b")}</b> ${t("s2")}</span></li><li><span><b>${t("s3b")}</b> ${t("s3")}</span></li></ol></div>`}`}
+  ${docs.length?`<div class="card" style="padding:2px 16px">${docs.slice(0,8).map(docRow).join("")}</div>`:`<div class="card start2"><div class="s2-art" aria-hidden="true" style="--fx:${LANG==="ar"?"-96px":"96px"}"><div class="s2-frame"><b></b><b></b><b></b><b></b></div><div class="s2-paper"><i></i><i></i><i></i><i style="width:70%"></i><i style="width:45%"></i><em>2 · 01</em><span class="s2-scan"></span></div><div class="s2-bin">${(binders.length?binders:DEMO).slice(0,3).map((b,i)=>`<span class="${i===1?"b2":""}">${ordner(b,0,true)}</span>`).join("")}</div></div>
+  <div class="s2-txt"><h3>${t("startH")}</h3><div class="s2-steps">${[["s1b","s1s",'<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M4 12h16"/>'],["s2b","s2s",'<path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/>'],["s3b","s3s",'<path d="M6 3h4v18H6zM14 3h4v18h-4z"/>']].map(([h,x,ic])=>`<div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg><b>${t(h)}</b><span>${t(x)}</span></div>`).join("")}</div></div></div>`}`}
 function libView(){
   const heights=[318,330,306,324,312,300,320,310];
   return`<h1>${t("library")}</h1><span class="sub" style="font-size:14px">${t("inDrawer",binders.length,docs.length)}</span>
@@ -621,6 +697,7 @@ async function fileDoc(res,imgs){
   const ins=await sb.from("documents").insert(row).select().single();if(ins.error)throw ins.error;
   docs.unshift(ins.data);render();return ins.data}
 function showFiled(d,isNew){
+  if(isNew){window.lastFiled=d.binder_id;clearTimeout(window.lfT);window.lfT=setTimeout(()=>{window.lastFiled=null},4000)}
   const b=binderOf(d.binder_id),s=sectionOf(d.section_id);
   openSheet(`<div style="display:flex;justify-content:space-between;align-items:center"><button class="back" onclick="closeSheet()" style="color:var(--ink)">${t("close")}</button>${isNew?`<span class="pill p-ok">${t("readSaved")}</span>`:""}</div>
   <span class="sub" style="display:block;margin-top:8px">${esc(d.sender||"")}</span><h1 style="font-size:22px;margin-top:4px">${esc(d.title||t("letter"))}</h1>
@@ -628,7 +705,7 @@ function showFiled(d,isNew){
   ${d.deadline?`<div class="dl"><span class="sub">${t("replyBy")}</span><span style="font-weight:600;color:var(--red)">${fmtDate(d.deadline)}${!d.done&&daysLeft(d.deadline)>=0?` · ${t("left",daysLeft(d.deadline))}`:""}</span></div>`:""}</div>
   ${b&&s?`<h2 style="color:var(--ink)">${isNew?t("putHere"):t("whereOrig")}</h2>${placeCard(b,s,d.doc_no)}<p class="sub" style="margin-top:10px;line-height:1.6">${isNew?t("writeNo",pad(d.doc_no),esc(tn(s.name))):esc(locText(d))}</p>`:""}
   <div class="pages" id="pages"></div>
-  <div class="btns">${isNew?`<button class="btn b-ink" onclick="closeSheet()">${t("filedBtn")}</button>`:`${d.deadline?`<button class="btn ${d.done?"b-soft":"b-ink"}" id="doneBtn">${d.done?t("notDone"):t("doneBtn")}</button>`:""}`}<button class="btn b-soft" id="moveBtn" style="${isNew?"width:auto;padding:0 18px;flex:none":""}">${t("move")}</button></div>
+  <div class="btns">${isNew?`<button class="btn b-ink" onclick="closeSheet();render()">${t("filedBtn")}</button>`:`${d.deadline?`<button class="btn ${d.done?"b-soft":"b-ink"}" id="doneBtn">${d.done?t("notDone"):t("doneBtn")}</button>`:""}`}<button class="btn b-soft" id="moveBtn" style="${isNew?"width:auto;padding:0 18px;flex:none":""}">${t("move")}</button></div>
   ${isNew?"":`<div class="btns"><button class="btn b-red" id="delBtn">${t("del")}</button></div>`}`);
   loadPages(d);
   $("#moveBtn").onclick=()=>moveSheet(d);
@@ -652,7 +729,7 @@ function confirmDel(d){openSheet(`<h1 style="font-size:22px">${t("delQ")}</h1><p
 document.addEventListener("click",e=>{
   const lEl=e.target.closest("[data-lang]");if(lEl){setLang(lEl.dataset.lang);return}
   const dEl=e.target.closest("[data-doc]");if(dEl){const d=docs.find(x=>x.id===dEl.dataset.doc);if(d)showFiled(d,false);return}
-  const bEl=e.target.closest("[data-binder]");if(bEl){openBinder=bEl.dataset.binder;openSection=null;view="binder";render();scrollTo(0,0);return}
+  const bEl=e.target.closest("[data-binder]");if(bEl){const go=()=>{openBinder=bEl.dataset.binder;openSection=null;view="binder";render();scrollTo(0,0)};if(bEl.classList.contains("spine")&&!matchMedia("(prefers-reduced-motion:reduce)").matches){bEl.classList.add("pull");setTimeout(go,240)}else go();return}
   const sEl=e.target.closest("[data-sec]");if(sEl){openSection=sEl.dataset.sec;render();return}
   const gEl=e.target.closest("[data-go]");if(gEl){view=gEl.dataset.go;render();return}
   const nEl=e.target.closest("#nav button");if(nEl){view=nEl.dataset.v;render();scrollTo(0,0);return}
