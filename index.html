@@ -601,7 +601,7 @@ function placeCard(b,s,no){
   <div class="paper"><div style="display:flex;justify-content:space-between;align-items:center"><i style="width:46%;background:${b.color}"></i><span class="hl">${pad(no)}</span></div><i></i><i style="width:80%"></i><i style="width:60%"></i></div></div></div></div>`}
 
 // ----- Scan → analyse → file -----
-$("#scanBtn").onclick=()=>{SC.pages=[];liveOpen()};
+$("#scanBtn").onclick=()=>{SC.pages=[];$("#file").value="";$("#file").click()};
 $("#file").onchange=e=>{const f=e.target.files[0];if(f)scnTake(f)};
 $("#scnX").onclick=scnClose;
 function aiCopy(blob){return new Promise(ok=>{const u=URL.createObjectURL(blob),i=new Image();i.onload=()=>{const k=Math.min(1,1300/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c.toDataURL("image/jpeg",.72).split(",")[1])};i.src=u})}
@@ -626,7 +626,7 @@ async function runRead(it){
 function pendCards(){return pending.map(it=>`<div class="card pend${it.status==="error"?" err":""}"><span class="pthumb"><img src="${it.thumb}" alt="">${it.n>1?`<b>${it.n}</b>`:""}</span><span style="flex:1;min-width:0">${it.status==="error"?`<b>${t("readFail")}</b><span class="sub" style="display:block;margin-top:2px">${esc(it.err||"")}</span><span style="display:flex;gap:8px;margin-top:10px"><button class="chip on" data-retry="${it.id}">${t("retry")}</button><button class="chip" data-drop="${it.id}">${t("cancel")}</button></span>`:`<b>${t("pendReading")}</b><span class="shim"></span>`}</span>${it.status==="reading"?'<span class="spin sm"></span>':""}</div>`).join("")}
 // ===== Scanner: edge detection, perspective flattening, scanner look =====
 const SC={pages:[],src:null,q:null,mode:"color",out:null,step:"edit"};
-function scnLoad(file){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,2400/Math.max(i.naturalWidth,i.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(i.naturalWidth*k);c.height=Math.round(i.naturalHeight*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};i.onerror=bad;i.src=u})}
+function scnLoad(file){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,4100/Math.max(i.naturalWidth,i.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(i.naturalWidth*k);c.height=Math.round(i.naturalHeight*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};i.onerror=bad;i.src=u})}
 
 function detectQuadBright(src){
   const k=Math.min(1,320/Math.max(src.width,src.height)),w=Math.max(8,Math.round(src.width*k)),h=Math.max(8,Math.round(src.height*k));
@@ -724,7 +724,7 @@ function warp(src,q){
   let ar=aspectWH(q,src.width,src.height);if(!(ar>.3&&ar<3.4))ar=W/H; // true width/height from camera geometry
   if(Math.abs(ar-.7071)/.7071<.07)ar=.7071;else if(Math.abs(ar-1.4142)/1.4142<.07)ar=1.4142; // snap to A4
   if(ar<1)H=W/ar;else W=H*ar;
-  const k=Math.min(1,2000/Math.max(W,H));W=Math.round(W*k);H=Math.round(H*k);
+  const k=Math.min(1,2500/Math.max(W,H));W=Math.round(W*k);H=Math.round(H*k);
   const[[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=q,dx1=x1-x2,dx2=x3-x2,dy1=y1-y2,dy2=y3-y2,sx=x0-x1+x2-x3,sy=y0-y1+y2-y3;
   let g=0,hh=0;if(Math.abs(sx)>1e-9||Math.abs(sy)>1e-9){const den=dx1*dy2-dx2*dy1;g=(sx*dy2-dx2*sy)/den;hh=(dx1*sy-sx*dy1)/den}
   const a=x1-x0+g*x1,b=x3-x0+hh*x3,c=x0,d=y1-y0+g*y1,e=y3-y0+hh*y3,f=y0;
@@ -768,7 +768,9 @@ function scnClose(){document.getElementById("scn").hidden=true;document.body.sty
 async function scnTake(file){
   scnOpen();scnBusy(t("prep"));
   try{SC.src=await scnLoad(file)}catch(e){scnClose();return failSheet(t("openFail"))}
-  SC.pushedOut=null;SC.q=detectQuad(SC.src);scnEdit()}
+  SC.pushedOut=null;scnBusy(t("scanning"));await new Promise(r=>setTimeout(r,30));
+  let q=null;try{q=detectQuad(SC.src,true,520)}catch(e){}
+  if(q){SC.q=q;SC.flat=warp(SC.src,SC.q);scnResult(true)}else{SC.q=detectQuadBright(SC.src);scnEdit()}}
 function scnBusy(msg){document.getElementById("scnStage").innerHTML=`<div class="scn-busy"><div class="spin"></div><p>${msg}</p></div>`;document.getElementById("scnBar").innerHTML=""}
 function scnHead(msg){document.getElementById("scnT").textContent=msg;document.getElementById("scnN").textContent=SC.pages.length?`${t("page")} ${SC.pages.length+1}`:""}
 function scnEdit(){
