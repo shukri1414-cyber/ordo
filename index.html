@@ -567,8 +567,8 @@ async function analyzeAndFile(imgs){
   openSheet(`<div class="spin"></div><p style="text-align:center;font-weight:600;font-size:17px" id="stage">${t("reading")}</p><p class="sub" style="text-align:center;margin-top:6px">${t("readingSub")}</p>`);
   const {data:{session}}=await sb.auth.getSession();
   let res;try{
-    const r=await fetch(SUPABASE_URL+"/functions/v1/analyze",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY},body:JSON.stringify({images:imgs.slice(0,4).map(x=>x.b64),lang:LANG})});
-    res=await r.json();if(!r.ok||res.error)throw new Error(res.error||r.status);
+    const call=async()=>{const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),90000);try{const r=await fetch(SUPABASE_URL+"/functions/v1/analyze",{signal:ctl.signal,method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY},body:JSON.stringify({images:imgs.slice(0,4).map(x=>x.b64),lang:LANG})});let j;try{j=await r.json()}catch(e){j={error:"HTTP "+r.status}}if(!r.ok||j.error){const e=new Error(j.error||r.status);e.retry=r.status>=500;throw e}return j}finally{clearTimeout(tm)}};
+    try{res=await call()}catch(e){if(!e.retry)throw e;await new Promise(r=>setTimeout(r,1500));res=await call()}
   }catch(err){return failSheet(t("readFail"),String(err.message||err))}
   $("#stage").textContent=t("saving");
   try{const d=await fileDoc(res,imgs);showFiled(d,true)}catch(err){failSheet(t("saveFail"),String(err.message||err))}
@@ -647,8 +647,8 @@ async function scnTake(file){
   scnOpen();scnBusy(t("prep"));
   try{SC.src=await scnLoad(file)}catch(e){scnClose();return failSheet(t("openFail"))}
   SC.pushedOut=null;SC.q=detectQuad(SC.src);scnEdit()}
-function scnBusy(t){document.getElementById("scnStage").innerHTML=`<div class="scn-busy"><div class="spin"></div><p>${t}</p></div>`;document.getElementById("scnBar").innerHTML=""}
-function scnHead(t){document.getElementById("scnT").textContent=t;document.getElementById("scnN").textContent=SC.pages.length?`${t("page")} ${SC.pages.length+1}`:""}
+function scnBusy(msg){document.getElementById("scnStage").innerHTML=`<div class="scn-busy"><div class="spin"></div><p>${msg}</p></div>`;document.getElementById("scnBar").innerHTML=""}
+function scnHead(msg){document.getElementById("scnT").textContent=msg;document.getElementById("scnN").textContent=SC.pages.length?`${t("page")} ${SC.pages.length+1}`:""}
 function scnEdit(){
   SC.step="edit";scnHead(t("corners"));
   document.getElementById("scnBar").innerHTML=`<div class="scn-row"><button class="scn-b ghost" id="scnAll">${t("fullImg")}</button><button class="scn-b main" id="scnGo">${t("cropScan")}</button></div>`;
@@ -686,7 +686,7 @@ function scnUnpush(){if(SC.pushedOut){SC.pages.pop();SC.pushedOut=null}}
 function scnBlob(cv){return new Promise(ok=>cv.toBlob(bl=>{const fr=new FileReader();fr.onload=()=>ok({blob:bl,b64:fr.result.split(",")[1]});fr.readAsDataURL(bl)},"image/jpeg",.8))}
 function scnFinish(){const imgs=SC.pages.slice(0,20);scnClose();analyzeAndFile(imgs)}
 
-function failSheet(t,detail){openSheet(`<h2 style="color:var(--ink);font-size:20px;margin:6px 0 10px">${esc(t)}</h2>${detail?`<p class="sub" style="direction:ltr;text-align:left">${esc(detail)}</p>`:""}<div class="btns"><button class="btn b-ink" onclick="closeSheet()">${t("ok")}</button></div>`)}
+function failSheet(msg,detail){openSheet(`<h2 style="color:var(--ink);font-size:20px;margin:6px 0 10px">${esc(msg)}</h2>${detail?`<p class="sub" style="direction:ltr;text-align:left">${esc(detail)}</p>`:""}<div class="btns"><button class="btn b-ink" onclick="closeSheet()">${t("ok")}</button></div>`)}
 function shrink(file,max,q){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);c.toBlob(bl=>{const fr=new FileReader();fr.onload=()=>ok({blob:bl,b64:fr.result.split(",")[1]});fr.readAsDataURL(bl)},"image/jpeg",q);URL.revokeObjectURL(u)};i.onerror=bad;i.src=u})}
 async function fileDoc(res,imgs){
   let sec=sectionOf(res.section_id)||sections.find(s=>s.name==="متفرقات")||sections[0];
