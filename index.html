@@ -682,7 +682,7 @@ function detectQuad(src,strict,maxSide){
       hit+=dl[yi*w+xi]}
     return cnt<N*.5?0:hit/cnt};
   const lum=(X,Y)=>{const xi=Math.round(X),yi=Math.round(Y);return xi<0||yi<0||xi>=w||yi>=h?null:b[yi*w+xi]};
-  let best=null,bs=0;
+  let best=null,bs=0;const cands=[];
   for(let a=0;a<hor.length;a++)for(let a2=a+1;a2<hor.length;a2++)for(let v=0;v<ver.length;v++)for(let v2=v+1;v2<ver.length;v2++){
     const P=[inter(hor[a],ver[v]),inter(hor[a],ver[v2]),inter(hor[a2],ver[v2]),inter(hor[a2],ver[v])];if(P.some(p=>!p))continue;
     if(P.some(p=>p[0]<-w*.03||p[1]<-h*.03||p[0]>w*1.03||p[1]>h*1.03))continue;
@@ -701,7 +701,8 @@ function detectQuad(src,strict,maxSide){
     let hin=0,hn=0;for(let i=0;i<4;i++){const p=P[i],q=P[(i+1)%4];for(let s2=1;s2<12;s2++){const X=p[0]+(q[0]-p[0])*s2/12,Y=p[1]+(q[1]-p[1])*s2/12,vx=cx-X,vy=cy-Y,vl=Math.hypot(vx,vy)||1;for(const dd2 of [5,9]){const xi=Math.round(X+vx/vl*dd2),yi=Math.round(Y+vy/vl*dd2);if(xi>=0&&yi>=0&&xi<w&&yi<h){hin+=hfm[yi*w+xi];hn++}}}}hin=hn?hin/hn:0;const texF=Math.exp(-Math.max(0,hin-1.5)/3);
     const sa=i=>{const p=P[i],q=P[(i+1)%4];return Math.atan2(q[1]-p[1],q[0]-p[0])},adf=(x,y)=>{let d=Math.abs(x-y)%Math.PI;return Math.min(d,Math.PI-d)*180/Math.PI},par=Math.max(adf(sa(0),sa(2)),adf(sa(1),sa(3)));if(par>22)continue;const parF=Math.exp(-Math.pow(par/10,2));
     const score=(avg*.6+mn*.4)*(0.55+ar)*(0.6+Math.min(contrast*4,1)*.8)*Math.pow(white,8)*parF*texF;
-    if(score>bs){bs=score;best=P}}
+    cands.push({P,score,ar});if(score>bs){bs=score;best=P}}
+  if(cands.length){let bm=0;for(const c of cands){if(c.score<bs*.35)continue;const m=c.score*Math.pow(c.ar,.7);if(m>bm){bm=m;best=c.P}}}
   if(best){// order TL,TR,BR,BL
     const s=best.map(p=>p[0]+p[1]),df=best.map(p=>p[0]-p[1]);const tl=best[s.indexOf(Math.min(...s))],br=best[s.indexOf(Math.max(...s))],tr=best[df.indexOf(Math.max(...df))],bl=best[df.indexOf(Math.min(...df))];
     const q=[tl,tr,br,bl].map(p=>[Math.max(0,Math.min(src.width,(p[0]+.5)/k)),Math.max(0,Math.min(src.height,(p[1]+.5)/k))]);
@@ -723,7 +724,7 @@ function aspectWH(q,iw,ih){ // q: TL,TR,BR,BL ; returns width/height
 function warp(src,q){
   let W=Math.max(dist(q[0],q[1]),dist(q[3],q[2])),H=Math.max(dist(q[0],q[3]),dist(q[1],q[2]));
   let ar=aspectWH(q,src.width,src.height);if(!(ar>.3&&ar<3.4))ar=W/H; // true width/height from camera geometry
-  if(Math.abs(ar-.7071)/.7071<.07)ar=.7071;else if(Math.abs(ar-1.4142)/1.4142<.07)ar=1.4142; // snap to A4
+  if(Math.abs(ar-.7071)/.7071<.2)ar=.7071;else if(Math.abs(ar-1.4142)/1.4142<.2)ar=1.4142; // snap to A4
   if(ar<1)H=W/ar;else W=H*ar;
   const k=Math.min(1,2500/Math.max(W,H));W=Math.round(W*k);H=Math.round(H*k);
   const[[x0,y0],[x1,y1],[x2,y2],[x3,y3]]=q,dx1=x1-x2,dx2=x3-x2,dy1=y1-y2,dy2=y3-y2,sx=x0-x1+x2-x3,sy=y0-y1+y2-y3;
