@@ -626,7 +626,7 @@ async function runRead(it){
   }catch(err){if(up)up.p.then(ps=>sb.storage.from("scans").remove(ps)).catch(()=>{});it.status="error";it.err=String(err.message||err);render()}}
 function pendCards(){return pending.map(it=>`<div class="card pend${it.status==="error"?" err":""}"><span class="pthumb"><img src="${it.thumb}" alt="">${it.n>1?`<b>${it.n}</b>`:""}</span><span style="flex:1;min-width:0">${it.status==="error"?`<b>${t("readFail")}</b><span class="sub" style="display:block;margin-top:2px">${esc(it.err||"")}</span><span style="display:flex;gap:8px;margin-top:10px"><button class="chip on" data-retry="${it.id}">${t("retry")}</button><button class="chip" data-drop="${it.id}">${t("cancel")}</button></span>`:`<b>${t("pendReading")}</b><span class="shim"></span>`}</span>${it.status==="reading"?'<span class="spin sm"></span>':""}</div>`).join("")}
 // ===== Scanner: edge detection, perspective flattening, scanner look =====
-const SC={pages:[],src:null,q:null,mode:"color",out:null,step:"edit"};
+const SC={pages:[],src:null,q:null,mode:"orig",out:null,step:"edit",pref:(()=>{try{return localStorage.getItem("ordo_pref")||"orig"}catch(e){return"orig"}})()};
 function scnLoad(file){return new Promise((ok,bad)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>{const k=Math.min(1,4100/Math.max(i.naturalWidth,i.naturalHeight));const c=document.createElement("canvas");c.width=Math.round(i.naturalWidth*k);c.height=Math.round(i.naturalHeight*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};i.onerror=bad;i.src=u})}
 
 function detectQuadBright(src){
@@ -771,7 +771,7 @@ async function scnTake(file){
   try{SC.src=await scnLoad(file)}catch(e){scnClose();return failSheet(t("openFail"))}
   SC.pushedOut=null;scnBusy(t("scanning"));await new Promise(r=>setTimeout(r,30));
   let q=null;try{q=detectQuad(SC.src,true,520)}catch(e){}
-  if(q){SC.mode=SC.pref||"color";SC.q=q;SC.flat=warp(SC.src,SC.q);scnResult(true)}else{SC.q=[[0,0],[SC.src.width,0],[SC.src.width,SC.src.height],[0,SC.src.height]];SC.flat=warp(SC.src,SC.q);SC.mode="orig";scnResult(true)}}
+  if(q){SC.mode=SC.pref;SC.q=q;SC.flat=warp(SC.src,SC.q);scnResult(true)}else{SC.q=[[0,0],[SC.src.width,0],[SC.src.width,SC.src.height],[0,SC.src.height]];SC.flat=warp(SC.src,SC.q);SC.mode="orig";scnResult(true)}}
 function scnBusy(msg){document.getElementById("scnStage").innerHTML=`<div class="scn-busy"><div class="spin"></div><p>${msg}</p></div>`;document.getElementById("scnBar").innerHTML=""}
 function scnHead(msg){document.getElementById("scnT").textContent=msg;document.getElementById("scnN").textContent=SC.pages.length?`${t("page")} ${SC.pages.length+1}`:""}
 function scnEdit(){
@@ -797,13 +797,13 @@ function scnEdit(){
 function scnResult(anim){
   SC.step="result";scnHead(t("scanRes"));
   SC.out=enhance(SC.flat,SC.mode);
-  const modes=[["scan",t("mScan")],["color",t("mColor")],["orig",t("mOrig")]];
+  const modes=[["orig",t("mOrig")],["color",t("mColor")],["scan",t("mScan")]];
   document.getElementById("scnBar").innerHTML=`<div class="scn-modes">${modes.map(([m,t])=>`<button data-m="${m}" class="${SC.mode===m?"on":""}" aria-pressed="${SC.mode===m}">${t}</button>`).join("")}</div>
    <div class="scn-row"><button class="scn-b ghost" id="scnBack">${t("edges")}</button><button class="scn-b ghost" id="scnMore">${t("addPage")}</button><button class="scn-b main" id="scnDone">${t("save")}${SC.pages.length?` (${SC.pages.length+1})`:""}</button></div>`;
   const st=document.getElementById("scnStage"),sr=st.getBoundingClientRect(),o=SC.out,k=Math.min((sr.width-40)/o.width,(sr.height-40)/o.height);
   st.innerHTML=`<div class="scn-paper${anim?" sweep":""}" style="width:${Math.round(o.width*k)}px;height:${Math.round(o.height*k)}px"></div>`;
   o.style.width="100%";o.style.height="100%";st.firstChild.appendChild(o);
-  document.querySelectorAll(".scn-modes button").forEach(b=>b.onclick=()=>{scnUnpush();SC.mode=b.dataset.m;if(b.dataset.m!=="orig")SC.pref=b.dataset.m;scnResult(false)});
+  document.querySelectorAll(".scn-modes button").forEach(b=>b.onclick=()=>{scnUnpush();SC.mode=b.dataset.m;SC.pref=b.dataset.m;try{localStorage.setItem("ordo_pref",SC.pref)}catch(e){}scnResult(false)});
   document.getElementById("scnBack").onclick=()=>{scnUnpush();scnEdit()};
   document.getElementById("scnMore").onclick=async()=>{if(SC.pushedOut!==SC.out){SC.pages.push(await scnBlob(SC.out));SC.pushedOut=SC.out}if(SC.pages.length>=20){return scnFinish()}$("#file").value="";$("#file").click()};
   document.getElementById("scnDone").onclick=async()=>{if(SC.pushedOut!==SC.out)SC.pages.push(await scnBlob(SC.out));scnFinish()}}
