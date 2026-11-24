@@ -777,7 +777,11 @@ function detectQuad(src,strict,maxSide){
     const sa=i=>{const p=P[i],q=P[(i+1)%4];return Math.atan2(q[1]-p[1],q[0]-p[0])},adf=(x,y)=>{let d=Math.abs(x-y)%Math.PI;return Math.min(d,Math.PI-d)*180/Math.PI},par=Math.max(adf(sa(0),sa(2)),adf(sa(1),sa(3)));if(par>22)continue;const parF=Math.exp(-Math.pow(par/10,2));
     const score=(avg*.6+mn*.4)*(0.55+ar)*(0.6+Math.min(contrast*4,1)*.8)*Math.pow(white,8)*parF*texF;
     cands.push({P,score,ar});if(score>bs){bs=score;best=P}}
-  if(cands.length){let bm=0;for(const c of cands){if(c.score<bs*.35)continue;const m=c.score*Math.pow(c.ar,.7);if(m>bm){bm=m;best=c.P}}}
+  const ordQ=P=>{const s=P.map(p=>p[0]+p[1]),df=P.map(p=>p[0]-p[1]);return[P[s.indexOf(Math.min(...s))],P[df.indexOf(Math.max(...df))],P[s.indexOf(Math.max(...s))],P[df.indexOf(Math.min(...df))]]};
+  const pr=P=>{const q=ordQ(P);let a=aspectWH(q,w,h);if(!(a>.2&&a<5)){const W=Math.max(dist(q[0],q[1]),dist(q[3],q[2])),H=Math.max(dist(q[0],q[3]),dist(q[1],q[2]));a=W/H}return Math.max(a,1/a)};
+  if(cands.length){let bm=0,bpr=0;for(const c of cands){if(c.score<bs*.3)continue;const r=pr(c.P),aF=Math.max(.12,Math.exp(-Math.pow((r-1.414)/.2,2)));const m=c.score*Math.pow(c.ar,.7)*aF;if(m>bm){bm=m;best=c.P;bpr=r}}
+    // a letter page is A4: a squat shape means we stopped at a fold line, so keep the whole photo instead of losing part of the page
+    if(bpr<1.2)best=null}
   if(best){// order TL,TR,BR,BL
     const s=best.map(p=>p[0]+p[1]),df=best.map(p=>p[0]-p[1]);const tl=best[s.indexOf(Math.min(...s))],br=best[s.indexOf(Math.max(...s))],tr=best[df.indexOf(Math.max(...df))],bl=best[df.indexOf(Math.min(...df))];
     const q=[tl,tr,br,bl].map(p=>[Math.max(0,Math.min(src.width,(p[0]+.5)/k)),Math.max(0,Math.min(src.height,(p[1]+.5)/k))]);
