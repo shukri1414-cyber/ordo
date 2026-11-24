@@ -370,9 +370,9 @@ nav button.on{position:relative}nav button.on::after{content:"";position:absolut
 .askbtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:58px;margin-top:14px;border:0;border-radius:18px;background:linear-gradient(135deg,#1C2230,#2B3448);color:#fff;font:inherit;font-size:16.5px;font-weight:600;box-shadow:0 10px 24px rgba(20,28,45,.22)}
 .askbtn .dot{width:30px;height:30px;border-radius:10px;background:#F2A44B;display:grid;place-items:center;font-size:16px}
 .qa{display:flex;flex-direction:column;gap:12px;margin-top:14px}
-.bq{align-self:flex-start;max-width:85%;background:var(--ink);color:var(--bg);padding:11px 15px;border-radius:18px;font-size:15.5px;line-height:1.55;white-space:pre-wrap}
+.bq{align-self:flex-start;max-width:85%;background:var(--ink);color:var(--bg);padding:11px 15px;border-radius:18px;font-size:15.5px;line-height:1.55;white-space:pre-wrap;unicode-bidi:plaintext}
 [dir=ltr] .bq{align-self:flex-end}
-.ba{align-self:stretch;background:var(--card);box-shadow:var(--sh);padding:15px 16px 10px;border-radius:18px;font-size:15.5px;line-height:1.75;white-space:pre-wrap;color:var(--ink)}
+.ba{align-self:stretch;background:var(--card);box-shadow:var(--sh);padding:15px 16px 10px;border-radius:18px;font-size:15.5px;line-height:1.75;color:var(--ink);overflow-wrap:anywhere}.ba div[dir=auto]{unicode-bidi:plaintext;text-align:start}
 .ba .cp{display:inline-block;margin-top:8px;border:0;background:var(--soft);color:var(--ink);font:inherit;font-size:13px;padding:6px 12px;border-radius:10px}
 .sugg{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .sugg button{border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:14px;padding:9px 13px;border-radius:14px}
@@ -647,7 +647,7 @@ function askSheet(d){
   <div class="sugg" id="sugg">${[t("sg1"),t("sg2"),t("sg3"),t("sg4")].map(x=>`<button data-sg="${esc(x)}">${esc(x)}</button>`).join("")}</div>
   <div class="askbar"><textarea id="askIn" rows="1" placeholder="${esc(t("askPh"))}"></textarea><button id="askGo" aria-label="${esc(t("askSend"))}">${document.documentElement.dir==="rtl"?"↑":"↑"}</button></div>`);
   const qa=$("#qa"),inp=$("#askIn"),go=$("#askGo");
-  const bubble=(q,a,busy)=>`<div class="bq">${esc(q)}</div>${busy?`<div class="ba" id="askBusy"><span class="sub">${t("askThinking")}</span><span class="shim"></span></div>`:`<div class="ba">${esc(a)}<br><button class="cp" data-cp="1">${t("copy")}</button></div>`}`;
+  const bubble=(q,a,busy)=>`<div class="bq">${esc(q)}</div>${busy?`<div class="ba" id="askBusy"><span class="sub">${t("askThinking")}</span><span class="shim"></span></div>`:`<div class="ba">${String(a).split("\n").map(l=>l.trim()?`<div dir="auto">${esc(l)}</div>`:`<div style="height:.7em"></div>`).join("")}<button class="cp" data-cp="1">${t("copy")}</button></div>`}`;
   const draw=()=>{qa.innerHTML=qaGet(d).map(x=>bubble(x.q,x.a)).join("");qa.querySelectorAll("[data-cp]").forEach((b,i)=>b.onclick=()=>{const txt=qaGet(d)[i].a;(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).then(()=>toast(t("copied"))).catch(()=>{})})};
   draw();
   $("#askBack").onclick=()=>showFiled(d,false);
@@ -904,7 +904,7 @@ function showFiled(d,isNew){
   <span class="sub" style="display:block;margin-top:8px">${esc(d.sender||"")}</span><h1 style="font-size:22px;margin-top:4px">${esc(d.title||t("letter"))}</h1>
   <div class="card info"><div><span class="k">${t("whatWant")}</span><p>${esc(d.summary||"—")}</p></div>${d.action?`<div><span class="k">${t("todo")}</span><p>${esc(d.action)}</p></div>`:""}
   ${d.deadline?`<div class="dl"><span class="sub">${t("replyBy")}</span><span style="font-weight:600;color:var(--red)">${fmtDate(d.deadline)}${!d.done&&daysLeft(d.deadline)>=0?` · ${t("left",daysLeft(d.deadline))}`:""}</span></div>`:""}</div>
-  ${isNew?"":`<button class="askbtn" id="askBtn"><span class="dot">💬</span>${t("askBtn")}</button>`}
+  ${`<button class="askbtn" id="askBtn"><span class="dot">💬</span>${t("askBtn")}</button>`}
   ${b&&s?`<h2 style="color:var(--ink)">${isNew?t("putHere"):t("whereOrig")}</h2>${placeCard(b,s,d.doc_no)}<p class="sub" style="margin-top:10px;line-height:1.6">${isNew?t("writeNo",pad(d.doc_no),esc(tn(s.name))):esc(locText(d))}</p>`:""}
   <div class="pages" id="pages"></div>
   <div class="btns">${isNew?`<button class="btn b-ink" onclick="closeSheet();render()">${t("filedBtn")}</button>`:`${d.deadline?`<button class="btn ${d.done?"b-soft":"b-ink"}" id="doneBtn">${d.done?t("notDone"):t("doneBtn")}</button>`:""}`}<button class="btn b-soft" id="moveBtn" style="${isNew?"width:auto;padding:0 18px;flex:none":""}">${t("move")}</button></div>
